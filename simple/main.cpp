@@ -70,11 +70,16 @@ int main(int argc, char** argv)
                                         
 	uint32_t m_nSecParam = 128;
 
-        //creating timing file !!!!
+        //creating timing file 
         ifstream ifile("timing.csv");
 	fstream fout;
         fout.open("timing.csv", ios::out);
         auto start = std::chrono::steady_clock::now();
+	
+        //creating communication file
+        ifstream i_file("com.csv");
+        fstream fout_com;
+        fout_com.open("com.csv", ios::out);
 
         synchGBF* test=new synchGBF(Nbf);
   
@@ -125,7 +130,7 @@ int main(int argc, char** argv)
       
           //p0 generates keys from the crypto var
           //After that, he gets/sends the keys from/to the rest of the parties
-          functions::secret_sharing_seed_p0(P0_s,parties,keys,keys_recv);
+          functions::secret_sharing_seed_p0(P0_s,parties,keys,keys_recv,&fout_com);
        
           auto test4 = std::chrono::steady_clock::now();
          
@@ -264,7 +269,7 @@ int main(int argc, char** argv)
 	  //--step 11-- comulative gbfs
           //getting the GBFs from the opponent parties and xoring them 
           cout<<"computing gbf p0"<<endl;
-	  block* GBF=functions::compute_gbf(P0_s,Nbf,test);
+	  block* GBF=functions::compute_gbf1(P0_s,Nbf,test,&fout_com);
           start=functions::get_duration(start,fout);
 
 	  //--step 12-- output
@@ -279,7 +284,8 @@ int main(int argc, char** argv)
 	  fout.close();
           delete crypt_;  
 
-
+          std::cout<<"exit";
+		
       }
 
       // if pi
@@ -313,12 +319,12 @@ int main(int argc, char** argv)
 	  block* keys_recv=new block[parties-1];
             
           //generating keys for each pi. Sending these keys and receiving keys from each other party.
-          functions::secret_sharing_seed_pi(pi,parties,crypt,player,keys,keys_recv);
+          functions::secret_sharing_seed_pi(pi,parties,crypt,player,keys,keys_recv,&fout_com);
 
 	  //agreement
 	  //sending and receiving seed-commit to/from each party. 
 	  //calculating the common seed
-          functions::seeds_agreement_pi(pi, parties,commit,seed,player);
+          functions::seeds_agreement_pi(pi, parties,commit,seed,player,&fout_com);
 	      
           //calculating seeds from the common seed using AES
 	  unsigned int* hash_seeds=functions::get_seeds(seeds_num,seed);
@@ -331,8 +337,9 @@ int main(int argc, char** argv)
 	  //--steps 3+4-- offline_apport
           if (parties>2){
                  cout<<"Offline_app_ROT executed"<<endl;
+                 std::mutex mu;
 		 //running offline apport as a receiver and as a sender
-	         thread* t1=new thread(functions::run_offline_apport,pi,&ips,ports,player,0);
+	         thread* t1=new thread(functions::run_offline_apport,pi,&ips,ports,player,0,&fout_com,&mu);
 
                  //--step 5-- distribution of gbf shares
                  cout<<"Secret-sharing exectued"<<endl;
@@ -342,62 +349,64 @@ int main(int argc, char** argv)
                  t1->join();
                  t2->join();
 
-                delete t1;
-                delete t2;
-         }
+                 delete t1;
+                 delete t2;
+          }
 	      
-         else//only 2 parties, no secret-sharing
-         {
-            cout<<"Offline_app_ROT executed"<<endl;
-            functions::run_offline_apport(pi,&ips,ports,player,0);
-         }
+          else//only 2 parties, no secret-sharing
+          {
+                 cout<<"Offline_app_ROT executed"<<endl;
+                 std::mutex mu;
+                 functions::run_offline_apport(pi,&ips,ports,player,0,&fout_com,&mu);
+          }
 
-        //memory allocations for online phase, needed for rerandomization
-        block* Y= new block[items_size];
-        block* GBF1=new block[Nbf];
+          //memory allocations for online phase, needed for rerandomization
+          block* Y= new block[items_size];
+          block* GBF1=new block[Nbf];
 
-        start=functions::get_duration(start,fout);
-
-
-        //Online phase
-
-        //--step 6-- compute BF
-
-	std::set<int>* h_kokhav=new std::set<int>[items_size];
-	pi->create_BF(h_kokhav,hash_seeds, seed);
-
-        delete [] hash_seeds;
-
-        start=functions::get_duration(start,fout);
-
-        //--step 7+10-- online apport
-        functions::run_online_apport(pi,test);
-        cout<<"end online appROT pi"<<endl;
-        start=functions::get_duration(start,fout);
-
-        //--step 8-- compute codewords
-        cout<<"re_randomize"<<endl;
-	//setting Y and creating randomizeD gbf
-        GBF1=functions::re_randomization(items, Y, items_size , Nbf, bytes ,  h_kokhav , crypt, pi, GBF1, test);
-
-        start=functions::get_duration(start,fout);
-
-	//--step 11-- comulative gbfs
-        //sending the GBF to P0
-        cout<<"comulative_gbf_pi"<<endl;
-	functions::comulative_gbf_pi(pi,Nbf,GBF1);
-
-        start=functions::get_duration(start,fout);
-        fout<<endl;
-        fout.close();
-        delete crypt;  
-	cout<<"exit"<<endl;
+          start=functions::get_duration(start,fout);
  
 
-        }
+          //Online phase
 
-	for (int i=0;i<parties;i++){
+          //--step 6-- compute BF
+
+	  std::set<int>* h_kokhav=new std::set<int>[items_size];
+	  pi->create_BF(h_kokhav,hash_seeds, seed);
+
+          delete [] hash_seeds;
+
+          start=functions::get_duration(start,fout);
+
+          //--step 7+10-- online apport
+          std::mutex mu;
+          functions::run_online_apport(pi,test,&fout_com,&mu);
+          cout<<"end online appROT pi"<<endl;
+          start=functions::get_duration(start,fout);
+
+          //--step 8-- compute codewords
+          cout<<"re_randomize"<<endl;
+	  //setting Y and creating randomizeD gbf
+          GBF1=functions::re_randomization(items, Y, items_size , Nbf, bytes ,  h_kokhav , crypt, pi, GBF1, test);
+
+          start=functions::get_duration(start,fout);
+
+	  //--step 11-- comulative gbfs
+          //sending the GBF to P0
+          cout<<"comulative_gbf_pi"<<endl;
+	  functions::comulative_gbf_pi(pi,Nbf,GBF1,&fout_com);
+	      
+          start=functions::get_duration(start,fout);
+          fout<<endl;
+          fout.close();
+          delete crypt;  
+	  cout<<"exit"<<endl;
+ 
+
+     }
+
+     for (int i=0;i<parties;i++){
 		delete [] ports[i];
-        }
-        delete [] ports;
+     }
+     delete [] ports;
 }
