@@ -15,7 +15,7 @@
  *
  * @param BF Bloom filter
  * @param Nbf Bloom filter's size
- * @param b bitset of the bits for every string's index
+ * @param arr_indexes vectors for the 0's indexes and for the 1's indexes
  * @param indexes Array of the indexes of the strings
  * @param Not the size of the bitset and the indexes
  * @param Ncc size of group C
@@ -23,109 +23,55 @@
  */
 	
 	
-void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,BitVector* b, int* indexes,int Not, int Ncc,crypto *crypt){
-   
-   vector<int> zeros_to_set;
-   vector<int> ones_to_set;
-   vector<int> zeros;
-   vector<int> ones;
-	
-   //searching for the indexes of 0's and 1's in the BF
-   for (int i = 0; i <Nbf; i++) {
-       if (BF.get_bit(i)==0) 
-           zeros_to_set.push_back(i);
-       else
-           ones_to_set.push_back(i);
-   }
-	 
-   //searching for the 0's and 1's in the Bitstring
-   for (int i = 0; i <(Not-Ncc); i++) {
-       if ((*b)[i]==0)
-	   zeros.push_back(i);
-       else
-	   ones.push_back(i);
-   }
-   
-    //there are not enough 0's or 1's in the range 0..Not-Ncc	  
-    if ((ones.size()<ones_to_set.size()) || (zeros.size()<zeros_to_set.size())) {
-	cout<<"There are not enougth 1's or 0's in 0..Not-Ncc-1"<<endl;
-    cout<<"Number of ones = "<<ones.size()<<", required number ="<<ones_to_set.size()<<endl;
-    cout<<"Number of zeros = "<<zeros.size()<<", required number ="<<zeros_to_set.size()<<endl;
-    if (ones.size()<ones_to_set.size())
-    {
-            cout<<"Not enough ones - big problem!"<<endl;
-            exit(1);
-    }
-    if (zeros.size()<zeros_to_set.size()) 
-    {
-            cout<<"Not enough zeros - annoying problem!"<<endl;
-    }
-        
-    //in order that will be intersection between the two group and the other size will abort
-    indexes[Nbf-1]=indexes[Not-1];
-    //return;
-    }
+void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt){
+
+
+    //get the 0's and 1's sizes
+    int size[2];
+    size[0]=arr_indexes[0].size();
+    size[1]=arr_indexes[1].size();
 
     //get random numbers 
-    unsigned int* r=new unsigned int[zeros_to_set.size()];
-    crypt->gen_rnd((BYTE*)r,4*zeros_to_set.size());
+    unsigned int* rand=new unsigned int [Nbf];
+    crypt->gen_rnd((BYTE*)rand,4*Nbf);
 
     //arranging the indexes
     int* indexes1=new int[Nbf];
-    int current=0;
-    int size =zeros.size();
+    
+    int bit=-1;
 		    
-    for (long unsigned int i=0;i<zeros_to_set.size();i++){
+    try{
+        for (int i=0;i<Nbf;i++){
 
-       //get random number in range [0,..,number of zeros]   
-       int rand0=r[i]%size;
+           //getting the bit
+           bit=BF.get_bit(i);
+
+           //converting 2 bytes to 16bit number modulo the size of the group	   
+           int r=rand[i]%size[bit];
 	   
-       //placing the chosen index in the correct place according to the bloom filter
-       indexes1[zeros_to_set[current]]=indexes[zeros[rand0]];
+           //placing the chosen index in the correct place according to the bloom filter
+           indexes1[i]=(*indexes)[arr_indexes[bit][r]];
        
-       //putting the index in the last place in order to not choose it again
-       int temp=zeros[size-1];
-       zeros[size-1]=zeros[rand0];
-       zeros[rand0]=temp;
+           //putting the index in the last place, in order to not choose it again
+           arr_indexes[bit][r]=arr_indexes[bit][size[bit]-1];
 		   
-       current++;
-       size--;
+           size[bit]--;
+        }
     }
-	
-    delete [] r;
-	
-    //get random numbers 
-    unsigned int* r1=new unsigned int[ones_to_set.size()];
-    crypt->gen_rnd((BYTE*)r1,4*ones_to_set.size());
+    catch (const std::out_of_range& oor) {
+       cout<<"Not enough "<<bit<<"s - problem!"<<endl;
+       exit(1);
+    }
 
-    //arranging the indexes and creating the function
+    delete [] arr_indexes;	
+    delete [] rand;
+    delete [] (*indexes);	
 
-    current=0;
-    size =ones.size();
-	   
-    for (long unsigned int i=0;i<ones_to_set.size();i++){
-       int rand1=r1[i]%size;
+    (*indexes)=indexes1;	
 
-       indexes1[ones_to_set[current]]=indexes[ones[rand1]];
-
-       int temp=ones[size-1];
-       ones[size-1]=ones[rand1];
-       ones[rand1]=temp;
-		   
-       current++;
-       size--;
-    }	
-	
-    delete [] r1;
-	
-    cout<<endl;
-    for (int i=0;i<Nbf;i++)
-       indexes[i]=indexes1[i];	
-
-    delete [] indexes1;
-	
     cout<<"arrange_the_indexes complete!"<<endl;
 }
+
 
 //#######
 
