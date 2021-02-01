@@ -106,10 +106,55 @@ unsigned int* functions::get_seeds(int seeds_num, block seed){
 	
 }
 
-//#######
+/**
+ * the function get range of items, and put the result of activating the hush function in the BF
+ *
+ * @param seeds_num number of seeds
+ * @param h_kokhav array of groups of indexes which represents the result of the hush functions for each item 
+ * @param BF the bloom filter
+ * @param AES the hush function
+ * @param start the index of the first item
+ * @param end the index of the last item
+ * @param encNum half of the number of seeds
+ * @param items array of items
+ * @param Nbf the number of bits in the bloom filter
+
+ */
+
+
+void functions::bf_thread(int seeds_num, std::set<int>* h_kokhav,Bitstring* BF,details::AES<details::AESTypes::NI>* aes,int start,int end,int encNum,std::vector <int>* items, int Nbf){
+    
+    //storage for the random numbers	
+    block* plaintexts = new block[encNum];
+    block* ciphertexts= new block[encNum];
+
+    //getting random numbers for each item and putting 1's in the BF
+    for (int i=start;i<end;i++){
+	 //getting random numbers
+         for (int j=0;j<encNum;j++) plaintexts[j]=toBlock((*items)[i],0)^toBlock(0,j);
+         (*aes).ecbEncBlocks(plaintexts, encNum, ciphertexts);
+         //putting 1's in the right places in the BF
+         for (int j=0;j<seeds_num/2;j++){
+             uint64_t h1=(ciphertexts[j].as<std::uint64_t>()[0])%((uint64_t)Nbf);
+             uint64_t h2=(ciphertexts[j].as<std::uint64_t>()[1])%((uint64_t)Nbf);
+             BF->set_bit(h1,1);
+             BF->set_bit(h2,1);
+             h_kokhav[i].insert(h1);
+             h_kokhav[i].insert(h2);
+         }
+         if ((seeds_num%2)==1){
+	     uint64_t h1=(ciphertexts[seeds_num/2].as<std::uint64_t>()[0])%((uint64_t)Nbf);
+	     BF->set_bit(h1,1);
+             h_kokhav[i].insert(h1);
+         }
+     }
+
+     delete [] plaintexts;
+     delete [] ciphertexts;
+}
 
 /**
- * Creating a bloom filter and setting group of indexes to each item
+ * Creating a bloom filter by sending each range of items to a different thread
  *
  * @param h_kokhav array of groups of indexes which represents the result of the hush functions for each item 
  * @param items array of items
@@ -120,62 +165,43 @@ unsigned int* functions::get_seeds(int seeds_num, block seed){
  * @param seeds seeds
  * @param seed common_seed
  */
- 
 
-void functions::create_BF(std::set<int>* h_kokhav,std::vector <int>& items, int len, Bitstring& BF, int Nbf,int seeds_num, unsigned int* seeds, block seed){
-    
-        
-    //setting as key the common seed, and as the messages xor of the item and 0,..,len/2
+void functions::create_BF_threads(std::set<int>* h_kokhav,std::vector <int>* items, int len, Bitstring* BF, int Nbf,int seeds_num, unsigned int* seeds, block seed){
     auto start = std::chrono::steady_clock::now();
-    
-    details::AES<details::AESTypes::NI> aes;
-    aes.setKey(seed);
-	
+
+    //creating AES object
+    details::AES<details::AESTypes::NI>* aes=new details::AES<details::AESTypes::NI>();
+    aes->setKey(seed);
+
+    //calculating number of half seeds
     int encNum=seeds_num/2+(seeds_num%2);
-    block* plaintexts = new block[encNum];
-    block* ciphertexts= new block[encNum];
-	
+
     auto med = std::chrono::steady_clock::now();
     std::cout<<"BF consruction setup time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
-        
-    //for each item
-    for (int i=0;i<len;i++){
-         //setting to the messages xor of the item and 0,..,len/2
-         for (int j=0;j<encNum;j++) 
-	      plaintexts[j]=toBlock(items[i],0)^toBlock(0,j);
 
-         //activating aes
-         aes.ecbEncBlocks(plaintexts, encNum, ciphertexts);
+    //separating the items to 36 blocks, and sending each block to a thread which will create the BF
+    int begin=0;
+    int jump=len/36;
 
-         for (int j=0;j<seeds_num/2;j++){
-             //activate modulo Nbf on the AES result and putting 1 at this index in the bloom filter
-             uint64_t h1=(ciphertexts[j].as<std::uint64_t>()[0])%((uint64_t)Nbf);
-             uint64_t h2=(ciphertexts[j].as<std::uint64_t>()[1])%((uint64_t)Nbf);
-
-             BF.set_bit(h1,1);
-             BF.set_bit(h2,1);
-             //adding each index to the indexes' set of the item
-             h_kokhav[i].insert(h1);
-             h_kokhav[i].insert(h2);
-         }
-         if ((seeds_num%2)==1){
-	     uint64_t h1=(ciphertexts[seeds_num/2].as<std::uint64_t>()[0])%((uint64_t)Nbf);
-	     BF.set_bit(h1,1);
-             h_kokhav[i].insert(h1);
-         }
-
+    vector<thread*> threads;
+    for (int i=0;i<36;i++){
+        threads.push_back(new thread(functions::bf_thread,seeds_num,h_kokhav,BF,aes,begin,(begin+jump),encNum,items,Nbf));
+        begin+=jump;
     }
 
-     auto end = std::chrono::steady_clock::now();
-     std::cout<<"BF construction online time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<std::endl;
-     
-     delete [] ciphertexts;
-     delete [] plaintexts;
+    threads.push_back(new thread(functions::bf_thread,seeds_num,h_kokhav,BF,aes,begin,len,encNum,items,Nbf));
 
-    
+    for (auto& t:threads) t->join();
+    for (auto& t:threads) delete t;
+    threads.clear();
+
+    delete aes;
+
+    auto end = std::chrono::steady_clock::now();
+    std::cout<<"BF construction online time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<std::endl;
+
 }
 
-//#######
 	   
 /**
  * Creating a sub group of indexes
@@ -212,21 +238,21 @@ void functions::get_sub_group(int sub_group[],int big_group_size,int small_group
 
         //we need now to get numbers which are smaller than big_group_size(Not)
 	//Accordingly, we will activate modulo Not on each number we got from the AES function
-         std::cout<<"getting random vals"<<std::endl; 
+        std::cout<<"getting random vals"<<std::endl; 
 		 
-         std::set<unsigned int>* s=new set<unsigned int>();
+        std::set<unsigned int>* s=new set<unsigned int>();
 
-	 int i=0; 
-         int j=0;  
+	int i=0; 
+        int j=0;  
 		 
-         while((int)(*s).size()!=small_group_size){
+        while((int)(*s).size()!=small_group_size){
                    (*s).insert((unsigned int)(ciphertexts[j].as<std::uint64_t>()[i])%big_group_size);
                    i^=1;
                    if (i==0) j++;
                    if (j==size) std::cout<<"out of randoms"<<std::endl;      
-         }                                                                                                                                                                                                                                                                                                                                                                                 delete [] ciphertexts;
+         }                                                                                                                                                                                                                                                                                                                                                        
 
-                  
+         delete [] ciphertexts;           
 		 
          std::cout<<"setting the vals to the sub group"<<std::endl;   
          i=0;
@@ -312,10 +338,10 @@ void functions::compute_R_r(  int* sub_group,int* indexes,BitVector* b,int Ncc,i
 		
        //searching for the indexes of the 0's strings
        if (val==0){
-		  //adding to R group
+          //adding to R group
           R.push_back(sub_group[i]);
           //xoring to r
-	      r=r^strings[sub_group[i]];
+	  r=r^strings[sub_group[i]];
         }
     }
     cout<<"Size of R = "<<R.size()<<endl;
@@ -584,7 +610,7 @@ block* functions::check_the_item(set<int>& h_kokhav,block* GBF){
  * @param other_player the other player's index
 **/
 
-void functions::offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player){
+void functions::offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player,fstream* fout,std::mutex* mu){
 
    string str=(*ips)[other_player];
    str.append(":");
@@ -608,6 +634,7 @@ void functions::offline_apport_receiver(Party* party,std::vector<std::string>* i
        //computing the R group and r* and sending them
        party->compute_R_r();
        party->send_R_r();
+       party->get_zeros_ones(); 
 
    }
 
@@ -676,6 +703,7 @@ void functions::online_apport_receiver(Party* party, synchGBF* test){
     //party sends the injective func
     party->send_func();
 
+    party->create_RBF_receiver(test);
 }
 
 //############
@@ -689,8 +717,9 @@ void functions::online_apport_receiver(Party* party, synchGBF* test){
 
 void functions::online_apport_sender(Party* party, synchGBF* test){
 	
-    //party receives the injective func
+    //party receives the injective func and buildin
     party->recv_func();
+    party->create_RBF_sender(test);
 
 }
 
