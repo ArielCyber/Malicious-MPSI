@@ -27,9 +27,6 @@ int main(int argc, char** argv)
 	functions::get_values(values_file,items);
 	int items_size=items.size();
 	cout<<"data size: "<<items.size()<<endl;
-	//cout<<"data: ";
-	//for (long unsigned int i=0;i<items.size();i++) cout<<items[i]<<" ";
-	//cout<<endl;
 
 	//getting the ips of the players
 	std::vector <string> ips;
@@ -85,59 +82,57 @@ int main(int argc, char** argv)
 	//if p0
         if (player==0){
 
-	    //fout<<"Setup, Offline, Online,\n";
-            fout<<"Step 2 (setup), Steps 3+4(Offline AppROT), Step 6 (BF), Steps 7+10 ( Online AppROT), Step 11 (XOR), Step 12(output)"<<endl;
+	  //fout<<"Setup, Offline, Online,\n";
+          fout<<"Step 2 (setup), Steps 3+4(Offline AppROT), Step 6 (BF), Steps 7+10 ( Online AppROT), Step 11 (XOR), Step 12(output)"<<endl;
 
 		
 		
-		
-	    //--step 2-- hash seed agreement
+	  //--step 2-- hash seed agreement
 
-	    //auto start = std::chrono::steady_clock::now();
-            auto test1 = std::chrono::steady_clock::now();
+          auto test1 = std::chrono::steady_clock::now();
      
-            cout<<"creating p0"<<endl;
+          cout<<"creating p0"<<endl;
      
-	    //init P0 common vars
-	    P0::set(&items,items_size,Nbf,numOTs,Nc,bytes,maxOnes,seeds_num);
-            //creating vector of P0's instances
-            std::vector<P0*> P0_s;
-            //resizing it
-            P0_s.resize(parties-1);
-            std::cout<<"p0 size:"<<P0_s.size()<<std::endl;
-            auto test2 = std::chrono::steady_clock::now();
+	  //init P0 common vars
+	  P0::set(&items,items_size,Nbf,numOTs,Nc,bytes,maxOnes,seeds_num);
+          //creating vector of P0's instances
+          std::vector<P0*> P0_s;
+          //resizing it
+          P0_s.resize(parties-1);
+          std::cout<<"p0 size:"<<P0_s.size()<<std::endl;
+          auto test2 = std::chrono::steady_clock::now();
 
-            std::vector<std::thread*> threads;
+          std::vector<std::thread*> threads;
       
-            //creating P0's instance for each Pi!=0
-	    for (int i=1;i<parties;i++){
+          //creating P0's instance for each Pi!=0
+	  for (int i=1;i<parties;i++){
                 //setting different port and crypto vars
                 threads.push_back(new thread(functions::creating_p0_instance,(i-1),ports[i][0],&P0_s,numOfOnes,m_nSecParam,(uint8_t*) m_cConstSeed_p0[i]));
-	    }
+	  }
 
-            for (auto& t:threads) t->join();
-            for (auto& t:threads) delete t;  
-            threads.clear();
+          for (auto& t:threads) t->join();
+          for (auto& t:threads) delete t;  
+          threads.clear();
   
-            auto test3 = std::chrono::steady_clock::now();
+          auto test3 = std::chrono::steady_clock::now();
 
-            cout<<"sharing secret"<<endl;
+          cout<<"sharing secret"<<endl;
       
-            //the keys of p0 for each pi
-            block* keys=new block[parties-1];
-            //the keys of each pi for p0
-            block* keys_recv=new block[parties-1];
+          //the keys of p0 for each pi
+          block* keys=new block[parties-1];
+          //the keys of each pi for p0
+          block* keys_recv=new block[parties-1];
       
-           //p0 generates keys from the crypto var
-           //After that, he gets/sends the keys from/to the rest of the parties
-           functions::secret_sharing_seed_p0(P0_s,parties,keys,keys_recv);
+          //p0 generates keys from the crypto var
+          //After that, he gets/sends the keys from/to the rest of the parties
+          functions::secret_sharing_seed_p0(P0_s,parties,keys,keys_recv);
        
-           auto test4 = std::chrono::steady_clock::now();
+          auto test4 = std::chrono::steady_clock::now();
          
-           cout<<"setting seed-commit"<<endl;
-           //seed and commit of p0
-	   block seed;
-	   Commit commit;
+          cout<<"setting seed-commit"<<endl;
+          //seed and commit of p0
+	  block seed;
+	  Commit commit;
 
           //crypto var of p0 for creating seed and commit
           crypto *crypt_ = new crypto(m_nSecParam, (uint8_t*) m_cConstSeed[0]);
@@ -210,9 +205,10 @@ int main(int argc, char** argv)
 	  //4) sending R and r*
       
           cout<<"offline apport"<<endl;
+          std::mutex mu;
 	  for (int i=0;i<(parties-1);i++){
               int other_player=i+1;
-	      threads.push_back(new thread(functions::run_offline_apport,P0_s[i],&ips,ports,player,other_player));
+	      threads.push_back(new thread(functions::run_offline_apport,P0_s[i],&ips,ports,player,other_player,&fout_com,&mu));
 	  }
 
           for (auto& t:threads) t->join();
@@ -234,7 +230,7 @@ int main(int argc, char** argv)
           //and by activating modulo Nbf we getting indexes in the range of the bloom filter
           //setting to 1 each index in the bloom filter, and adding each index to its h_kokhav group
 	  std::set<int>* h_kokhav=new std::set<int>[items_size];
-	  P0::create_BF(h_kokhav,hash_seeds, seed);
+	  P0::create_BF_threads(h_kokhav,hash_seeds, seed);
 
           delete [] hash_seeds;
 
@@ -251,7 +247,7 @@ int main(int argc, char** argv)
           cout<<"online apport"<<endl;
 
 	  for (int i=0;i<(parties-1);i++){
-                threads.push_back(new thread(functions::run_online_apport,P0_s[i],test));
+                threads.push_back(new thread(functions::run_online_apport,P0_s[i],test,&fout_com,&mu));
 	  }
 
           for (auto& t:threads) t->join();
