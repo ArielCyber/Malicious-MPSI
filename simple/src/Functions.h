@@ -321,17 +321,13 @@ namespace functions{
     void arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt);
     void create_BF(std::set<int>* h_kokhav,std::vector <int>& items, int len, Bitstring& BF, int Nbf,int seeds_num, unsigned int* seeds, block seed);
     void get_sub_group(int* ,int,int,block&);
-    //void compute_keys(vector <int>& items,BYTE** RBF,BYTE** keys,int len_,int Nbf, int k,int seeds_num);
     void compute_r(block& r,std::vector<std::array<block, 2>>& strings,int* indexes,int indexes_size); 
     void compute_R_r( int* sub_group,int* indexes,BitVector* b,int Ncc,int Not, std::vector<block>& strings, block& r, std::vector <int> &R);
     int if_disjoint_sets(int *,int, int *,int, int);
-    //void find_intersection(vector <int>& intersec,int ,BYTE** keys1,int keys2_len,BYTE** keys2, vector<int>& ,int);
     unsigned int* get_seeds(int seeds_num, block seed);	
-    //void create_h_kokhav( set<int>* h_kokhav,vector <int>& items,int n, int Nbf, int seeds_num, unsigned int* seeds);
     block* re_randomization(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* r);
     block* re_randomization_zero(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test);
     block* check_the_item(set<int>& h_kokhav,int bytes, int Nbf,block* GBF);
-
 
     void offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player,fstream* fout,std::mutex* mu);
     void offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu);
@@ -355,7 +351,6 @@ namespace functions{
 
     void set_seed_commit(Commit& commit, block& seed,crypto* crypt);
 	
-
     void secret_write(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu);
     void secret_read(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu);
 
@@ -368,20 +363,12 @@ namespace functions{
     void get_intersection( std::set<int>* h_kokhav,int bytes,block* GBF);
     block* get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y, synchGBF* test);
     void comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout);
-
 	
     block* compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);
     block* compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);  
-    //block* compute_gbf_hyper_cube(int parties,std::vector<P0*>& P0_s, synchGBF* test);
-    // void get_gbf1(P0* p0,block* GBF,block* M1_STAR,block* M0_KOVA,Lock* lock,int j);
 	
     void get_gbf(P0* p0, synchGBF* test,unsigned long* data,int player,std::mutex** turn,std::queue<Gbf_seg*>** stack_arr,semaphore** sem);
     void get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player);
-    //void pi_hyper_cube(int player,int parties,Pi* pi,int Nbf,block* GBF1,block* r);
-    //void hyper_cube_pi_read(Pi* pi,Lock* lock,block* GBF,int Nbf,int other_player,int j);
-	
-    //void xor_vals0(block* GBF,block GBF1_STAR,block M1_STAR,block M0_KOVA, Lock* lock,int j);
-    //void xor_vals2(block b,Lock* lock,block* GBF,int j);
 	
     void secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout);
     void secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv);
