@@ -126,21 +126,20 @@ unsigned long Pi::send_sub_group(){
 }
 
 
-void Pi::recv_R(){
-     read_as_a_sender(&Nr_sender,sizeof(int));
+unsigned long Pi::recv_R(){
+     unsigned long sum=read_as_a_sender(&Nr_sender,sizeof(int));
      cout<<"From Alice: Nr: "<<Nr_sender<<endl<<endl;
      R_sender=new int[Nr_sender];
-     read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
-     read_as_a_sender(&r_sender,sizeof(block));
+     sum+=read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
+     sum+=read_as_a_sender(&r_sender,sizeof(block));
      cout<<"From Alice: r* (Alice): ";
      cout<<r_sender;
      cout<<endl;
      cout<<"R and r were received"<<endl;
+     return sum;
 }
 
 
-
-//Changed
 int Pi::check_if_to_abort1(){
 
     if (Nc_sender-Nr_sender>maxOnes){
@@ -183,10 +182,11 @@ int Pi::check_if_to_abort1(){
 }
 
 
-void Pi::recv_func(){
+unsigned long Pi::recv_func(){
      func_sender=new int[Nbf];
-     read_as_a_sender(func_sender,sizeof(int)*Nbf);
+     unsigned long sum=read_as_a_sender(func_sender,sizeof(int)*Nbf);
      cout<<"func was received"<<endl;
+     return sum;
 }
 
 
@@ -217,10 +217,14 @@ void Pi::create_BF(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed)
     cout<<"BF was created"<<endl;
 }	
 
-//TODO: change to XOR into GBF	
+void Pi::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){  
+    BF=new Bitstring(Nbf); 
+    functions::create_BF_threads( h_kokhav,&items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);   
+    cout<<"BF was created"<<endl;  
+}
+
+
 void Pi::create_RBF_sender(synchGBF* test){ 
-
-
     test->XORorderedBF(strings, func_sender,BF);
     cout<<"RBF was created"<<endl;
 	if (func_sender!=nullptr) delete [] func_sender;  
@@ -228,133 +232,132 @@ void Pi::create_RBF_sender(synchGBF* test){
 }	
 
 
-
-
-void Pi::write_as_a_sender(void* msg,unsigned long size){
-    int left1=size;
-    cout<<"left1: "<<left1<<endl;
+unsigned long Pi::write_as_a_sender(void* msg,unsigned long size){
     unsigned long left=size;
-    cout<<"left: "<<left<<endl;
     unsigned long n;
-    std::cout<<"size:"<<size;
-    std::cout<<"starting to send"<<std::endl;
+    unsigned long sum=0;
     while (left){
            n=write(s.connect_sock, &((char*)msg)[size-left],left);
            left-=n;
-
-	
+           sum+=n;
     }
-std::cout<<"ending to send "<<left<<std::endl;
+    return sum;
 }
 
-void Pi::write_as_a_sender(sender* snd,void* msg,unsigned long size){
-    int left1=size;
-    cout<<"left1: "<<left1<<endl;
+unsigned long Pi::write_as_a_sender(sender* snd,void* msg,unsigned long size){
     unsigned long left=size;
-        cout<<"left: "<<left<<endl;
     unsigned long n;
-
+    unsigned long sum=0;
     while (left){
            n=write(snd->connect_sock, &((char*)msg)[size-left],left);
            left-=n;
-	
+           sum+=n;
     }	 
+    return sum;
 }
 
-int Pi::read_as_a_sender(void* msg,unsigned long size){
-    int left=size;
-    int n;
+unsigned long Pi::read_as_a_sender(void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
     memset(msg,0,(unsigned long)size);
     while (left){
            n=read(s.connect_sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
-    return (size-left);	 
+    return sum;	 
 }
 
-int Pi::read_as_a_sender(sender* snd,void* msg,unsigned long size){
-     int left=size;
-     int n;
-	 
+unsigned long Pi::read_as_a_sender(sender* snd,void* msg,unsigned long size){
+     unsigned long left=size;
+     unsigned long n;
+     unsigned long sum=0;	 
      memset(msg,0,(unsigned long)size);
      while (left){
            n=read(snd->connect_sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
      }
-     return (size-left);	 
+     return sum;	 
 }
 	 
-void Pi::write_as_a_receiver(void* msg,unsigned long size){
-    int left=size;
-    int n;
+unsigned long Pi::write_as_a_receiver(void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
     while (left){
-
            n=write(recv.sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
+    return sum;
 }
 
-void Pi::write_as_a_receiver(receiver* recv,void* msg,unsigned long size){
-    int left=size;
-    int n;
-	
+unsigned long Pi::write_as_a_receiver(receiver* recv,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
     while (left){
-
            n=write(recv->sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
+    return sum;
 }
 
-int Pi::read_as_a_receiver(void* msg,unsigned long size){
-    int left=size;
-    int n;
+unsigned long Pi::read_as_a_receiver(void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
     memset(msg,0,(unsigned long)size);
-
+    unsigned long sum=0;
     while (left){
            n=read(recv.sock, &((char*)msg)[size-left],left);
-           left-=n;    
+           left-=n;
+           sum+=n;    
     }
 	
-    return (size-left);	 
+    return sum;	 
 }
 
-int Pi::read_as_a_receiver(receiver* recv,void* msg,unsigned long size){
-    int left=size;
-    int n;
+unsigned long Pi::read_as_a_receiver(receiver* recv,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
     memset(msg,0,(unsigned long)size);
 	 
     while (left){
            n=read(recv->sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
 	
-    return (size-left);	 
+    return sum;	 
 }
 
-void Pi::write_to_player(int other_player,void* msg,unsigned long size){
-    if (other_player==0) this->write_as_a_receiver(msg,size);
-    else if (other_player<player) this->write_as_a_receiver(&receivers[other_player-1],msg,size);
-    else this->write_as_a_sender(&senders[other_player-player-1],msg,size);
+unsigned long Pi::write_to_player(int other_player,void* msg,unsigned long size){
+    if (other_player==0) return this->write_as_a_receiver(msg,size);
+    else if (other_player<player) return this->write_as_a_receiver(&receivers[other_player-1],msg,size);
+    else return this->write_as_a_sender(&senders[other_player-player-1],msg,size);
 }
 
-void Pi::read_from_player(int other_player,void* msg,unsigned long size){
-    if (other_player==0) read_as_a_receiver(msg,size);
-    else if (other_player<player) read_as_a_receiver(&receivers[other_player-1],msg,size);
-    else read_as_a_sender(&senders[other_player-player-1],msg,size);
+unsigned long Pi::read_from_player(int other_player,void* msg,unsigned long size){
+    if (other_player==0) return read_as_a_receiver(msg,size);
+    else if (other_player<player) return read_as_a_receiver(&receivers[other_player-1],msg,size);
+    else return read_as_a_sender(&senders[other_player-player-1],msg,size);
 }
 
-void Pi::recv_C(){
-    read_as_a_receiver(&Nc_recv,sizeof(int));
+unsigned long Pi::recv_C(){
+    unsigned long sum=read_as_a_receiver(&Nc_recv,sizeof(int));
     cout<<"From P0: Nc: "<<Nc_recv<<endl<<endl;
     sub_group_recv=new int[Nc_recv];
     block seed_recv;
-    read_as_a_receiver( &seed_recv, sizeof(block));
+    sum+=read_as_a_receiver( &seed_recv, sizeof(block));
     functions::get_sub_group(sub_group_recv,Not,Nc_recv,seed_recv);
-
+    return sum;
 }
 
 
-//Changed
 int Pi::check_if_to_abort(){
 
     if (Nc_recv>Not-Nbf){
@@ -382,20 +385,21 @@ void Pi::compute_R_r(){
 
 }
 
-void Pi::send_R_r(){
-    write_as_a_receiver(&Nr_recv,sizeof(int));		
+unsigned long Pi::send_R_r(){
+    unsigned long sum=write_as_a_receiver(&Nr_recv,sizeof(int));		
     int arr[Nr_recv];
     for (int i=0;i<Nr_recv;i++)
     arr[i]=(*R_recv)[i];		
     if (R_recv!=nullptr) delete R_recv;
-    write_as_a_receiver(arr,sizeof(int)*Nr_recv);
-    write_as_a_receiver(&r_recv,sizeof(block));
+    sum+=write_as_a_receiver(arr,sizeof(int)*Nr_recv);
+    sum+=write_as_a_receiver(&r_recv,sizeof(block));
     cout<<"r and R were sent"<<endl;
+    return sum;
 }
 
 
 void Pi::arrange_the_indexes(){
-   functions::arrange_the_indexes(*BF,Nbf,b,func_recv,Not,Nc_recv,crypt);  
+   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt);
    cout<<"indexes were arranged"<<endl;   
 }
 
@@ -411,9 +415,10 @@ void Pi::create_RBF_receiver(synchGBF* test){
 }
 
 
-void Pi::send_func(){
-    write_as_a_receiver(func_recv,sizeof(int)*Nbf);
-    cout<<"func was sent"<<endl;	
+unsigned long Pi::send_func(){
+    unsigned long sum=write_as_a_receiver(func_recv,sizeof(int)*Nbf);
+    cout<<"func was sent"<<endl;
+    return sum;	
 }
 
 Pi::~Pi(){
