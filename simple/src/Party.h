@@ -37,7 +37,8 @@ public:
 
        virtual void write_as_a_sender(void* msg,unsigned long size)=0;
        virtual int read_as_a_sender(void* msg,unsigned long size)=0; 
-	
+
+       virtual void get_zeros_ones()=0;
        virtual void arrange_the_indexes()=0;
 
        virtual BitVector* getChoices() const=0;
