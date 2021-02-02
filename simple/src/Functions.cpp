@@ -46,15 +46,16 @@ void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr
            //getting the bit
            bit=BF.get_bit(i);
 
-           //converting 2 bytes to 16bit number modulo the size of the group	   
+           //getting random number in the range 0..size of 0's/1's indexes' vector
            int r=rand[i]%size[bit];
 	   
            //placing the chosen index in the correct place according to the bloom filter
            indexes1[i]=(*indexes)[arr_indexes[bit][r]];
        
-           //putting the index in the last place, in order to not choose it again
+           //moving the last index of the vector to the chosen index's place
            arr_indexes[bit][r]=arr_indexes[bit][size[bit]-1];
 		   
+           //decreasing the size of the vector (one index was chosen)
            size[bit]--;
         }
     }
