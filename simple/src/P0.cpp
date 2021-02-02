@@ -17,7 +17,6 @@ P0::P0(int port,int numOfOnes,uint32_t m_nSecParam,uint8_t* constSeed )
      strings=new std::vector<std::array<block, 2>>(Not);
      cout<<"strings:"<<strings->size();
      init_sender(port);
-     //$$$
      crypt = new crypto(m_nSecParam, constSeed);
      cout<<"creating choices"<<endl;
      bitvector=new BitVector(Not);
@@ -32,7 +31,6 @@ P0::P0(int port,int numOfOnes,uint32_t m_nSecParam,uint8_t* constSeed )
 crypto* P0::getCrypto(){
    return crypt;
 }
-//$$$ 
 
 int P0::Nbf=0;
 int P0::seeds_num=0;
@@ -45,12 +43,19 @@ int P0::string_length=0;
 int P0::maxOnes=0;
 std::vector<int>* P0::items=nullptr; 
 
-
+void P0::get_zeros_ones(){
+     arr_indexes=new vector<int>[2];
+     for (int i=0;i<Not;i++)
+         if ((*bitvector)[i]==0) arr_indexes[0].push_back(i);
+         else arr_indexes[1].push_back(i);
+     delete bitvector;
+}
 
 void P0::set_items(std::vector<int>* items,int items_size){
       P0::items=items;
       P0::items_size=items_size;
 }
+
 void P0::set_Nbf(int Nbf){
       P0::Nbf=Nbf;
 }
@@ -99,15 +104,12 @@ void P0::set(vector<int>* items,int items_size,int Nbf,int n,int Nc,int string_l
     set_maxOnes(maxOnes);
 	 
     cout<<"setting seeds num"<<endl;
-    P0::seeds_num=seeds_num;
-
-	
+    P0::seeds_num=seeds_num;	
 }
 
 void P0::delete_bf(){
 	if (BF!=nullptr) delete BF;
 }
-
 
 void P0::init_sender( int port){
      init_sender(&s,port);
@@ -161,10 +163,9 @@ void P0::init_receiver(struct receiver* recv,const char* ip,int port){
      if (connect(recv->sock, (struct sockaddr *)&recv->cli_name, sizeof(recv->cli_name)) >= 0){
            flag=0;	
      }
-}	
+}
 
-void P0::set_sub_group(){
-	
+void P0::set_sub_group(){	
     //creating seed
     unsigned long x1;
     unsigned long x2;
@@ -177,26 +178,25 @@ void P0::set_sub_group(){
     cout<<"sub group was set"<<endl;
 }
 
-void P0::send_sub_group(){
+unsigned long P0::send_sub_group(){
 
-    write_as_a_sender( &Nc_sender,sizeof(int));		   
-    write_as_a_sender( &seed_sub_group,sizeof(block));
+    unsigned long sum=write_as_a_sender( &Nc_sender,sizeof(int));		   
+    sum+=write_as_a_sender( &seed_sub_group,sizeof(block));
     cout<<"sub group was sent"<<endl;
+    return sum;
 }
 
-
-
-void P0::recv_R(){
-    read_as_a_sender(&Nr_sender,sizeof(int));
+unsigned long P0::recv_R(){
+    unsigned long sum=read_as_a_sender(&Nr_sender,sizeof(int));
     cout<<"From P0: Nr: "<<Nr_sender<<endl<<endl;
     R_sender=new int[Nr_sender];
-    read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
-    read_as_a_sender(&r_sender,sizeof(block));
+    sum+=read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
+    sum+=read_as_a_sender(&r_sender,sizeof(block));
     cout<<"From P0: r* (P0): "<<r_sender;
     cout<<endl;
     cout<<"R and r were received"<<endl;
+    return sum;
 }
-
 
 int P0::check_if_to_abort1(){
 
@@ -238,11 +238,11 @@ int P0::check_if_to_abort1(){
 
 
 
-void P0::recv_func(){
+unsigned long P0::recv_func(){
      func_sender=new int[Nbf];
-     read_as_a_sender(func_sender,sizeof(int)*Nbf);
-     //for (int i=0;i<Nbf;i++) cout<<i<<")"<<func_sender[i]<<" ";
+     unsigned long sum=read_as_a_sender(func_sender,sizeof(int)*Nbf);
      cout<<"func was received"<<endl;
+     return sum;
 }
 
 int P0::check_if_to_abort2(){
@@ -268,131 +268,149 @@ int P0::check_if_to_abort2(){
 void P0::create_BF(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){
     functions::create_BF( h_kokhav,*items, items_size, (*BF),Nbf,seeds_num,hash_seeds,seed);
     cout<<"BF was created"<<endl;
-}	
+}
+
+void P0::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){
+    functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds,seed);
+    cout<<"BF was created"<<endl;     
+}
 	
 void P0::create_RBF_sender(synchGBF* test){
     test->XORorderedBF(strings, func_sender,BF);
     cout<<"RBF was created"<<endl;
-    if (func_sender!=nullptr) delete [] func_sender;  
+	if (func_sender!=nullptr) delete [] func_sender;  
     if (strings!=nullptr) delete strings;
-}	
+}		
 
-
-void P0::write_as_a_sender(void* msg,unsigned long size){
-    int left=size;
-    int n;
-    cout<<left;
+unsigned long P0::write_as_a_sender(void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
     while (left){
            n=write(s.connect_sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
            cout<<left;
     }
+    return sum;
 }
 
-void P0::write_as_a_sender(sender* snd,void* msg,unsigned long size){
-    int left=size;
-    int n;
-    cout<<left;
-	
+unsigned long P0::write_as_a_sender(sender* snd,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;  	
     while (left){
            n=write(snd->connect_sock, &((char*)msg)[size-left],left);
            left-=n;
 	   cout<<left;
+           sum+=n;
     }
-	 
+    return sum;
 }
 
-int P0::read_as_a_sender(void* msg, unsigned long size){
-    int left=size;
-    int n;
-
+unsigned long P0::read_as_a_sender(void* msg, unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;  
     memset(msg,0,(unsigned long)size);
 	
     while (left){
            n=read(s.connect_sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
 	
-    return (size-left);	 
+    return sum;	 
 }
 
-int P0::read_as_a_sender(sender* snd,void* msg,unsigned long size){
-    int left=size;
-    int n;
-    cout<<0;
+unsigned long P0::read_as_a_sender(sender* snd,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
     memset(msg,0,(unsigned long)size);
 	 
     while (left){
            cout<<0;
            n=read(snd->connect_sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
 	
-    return (size-left);	 
+    return sum;	 
 }
 	 
-void P0::write_as_a_receiver(void* msg,unsigned long size){
-    int left=size;
-    int n;
+unsigned long P0::write_as_a_receiver(void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
+	
     while (left){
-
            n=write(recv.sock, &((char*)msg)[size-left],left);
            left-=n;
-	 
+           sum+=n; 
     }
+	
+    return sum;
 }
 
-void P0::write_as_a_receiver(receiver* recv,void* msg,unsigned long size){
-    int left=size;
-    int n;
+unsigned long P0::write_as_a_receiver(receiver* recv,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
 	
     while (left){
 
            n=write(recv->sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
+	
+    return sum;
 }
 
-int P0::read_as_a_receiver(void* msg, unsigned long size){
+unsigned long P0::read_as_a_receiver(void* msg, unsigned long size){
     unsigned long left=size; 
-    int left1=size;
     unsigned long n;
+    unsigned long sum=0;
     memset(msg,0,(unsigned long)size);
 
     while (left){
 
            n=read(recv.sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
     }
 	
-    return (size-left);	 
+    return sum;	 
 }
 
-int P0::read_as_a_receiver(receiver* recv,void* msg,unsigned long size){
-    int left=size;
-    int n;
+unsigned long P0::read_as_a_receiver(receiver* recv,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;  
     memset(msg,0,(unsigned long)size);
 	 
     while (left){
 
            n=read(recv->sock, &((char*)msg)[size-left],left);
            left-=n;
+           sum+=n;
 	 
     }
 	
-    return (size-left);	 
+    return sum;	 
 }
 
-void P0::recv_C(){
-    read_as_a_receiver(&Nc_recv,sizeof(int));
+unsigned long P0::recv_C(){
+    unsigned long sum=read_as_a_receiver(&Nc_recv,sizeof(int));
     cout<<"From P0: Nc: "<<Nc_recv<<endl<<endl;
     sub_group_recv=new int[Nc_recv];
     block seed_recv;
-    read_as_a_receiver( &seed_recv, sizeof(block));
+    sum+=read_as_a_receiver( &seed_recv, sizeof(block));
     functions::get_sub_group(sub_group_recv,Not,Nc_recv,seed_recv);
+    return sum;
+
 }
-
-
 
 int P0::check_if_to_abort(){
 
@@ -421,21 +439,20 @@ void P0::compute_R_r(){
     cout<<"r and R were computed"<<endl;
 }
 
-void P0::send_R_r(){
-    write_as_a_receiver(&Nr_recv,sizeof(int));		
+unsigned long P0::send_R_r(){
+    unsigned long sum=write_as_a_receiver(&Nr_recv,sizeof(int));		
     int arr[Nr_recv];
     for (int i=0;i<Nr_recv;i++)
     arr[i]=(*R_recv)[i];		
     if (R_recv!=nullptr) delete R_recv;
-    write_as_a_receiver(arr,sizeof(int)*Nr_recv);
-    write_as_a_receiver(&r_recv,sizeof(block));
+    sum+=write_as_a_receiver(arr,sizeof(int)*Nr_recv);
+    sum+=write_as_a_receiver(&r_recv,sizeof(block));
     cout<<"r and R were sent"<<endl;
+    return sum;
 }
 
-
 void P0::arrange_the_indexes(){
-   functions::arrange_the_indexes(*BF,Nbf,bitvector,func_recv,Not,Nc_recv,crypt); 
-   delete bitvector;
+   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt); 
    cout<<"indexes were arranged"<<endl;   
 }
 
@@ -444,16 +461,13 @@ void P0::create_RBF_receiver(synchGBF* test){
    cout<<"rbf was created"<<endl;
    if (func_recv!=nullptr) delete [] func_recv;
    if (strings_choices!=nullptr) delete strings_choices;
-   
 }
 
-
-void P0::send_func(){
-
-   write_as_a_receiver(func_recv,sizeof(int)*Nbf);
-   cout<<"func was sent"<<endl;	
-}
-	
+unsigned long P0::send_func(){
+   unsigned long sum=write_as_a_receiver(func_recv,sizeof(int)*Nbf);
+   cout<<"func was sent"<<endl;
+   return sum;	
+}	
 
 P0::~P0(){
 
@@ -463,7 +477,6 @@ P0::~P0(){
    delete crypt;
 
 }
-
 
 BitVector* P0::getChoices() const{
     return bitvector;
