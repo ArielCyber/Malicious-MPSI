@@ -14,29 +14,28 @@ public:
        virtual void init_sender(int port)=0; 
        virtual void init_receiver(const char* ip,int port)=0; 
 	   
-       virtual void send_sub_group()=0;  
+       virtual unsigned long send_sub_group()=0;  
        virtual void set_sub_group()=0;  
-       virtual void recv_C()=0;
+       virtual unsigned long recv_C()=0; 
 	   
        virtual void compute_R_r()=0;
-       virtual void send_R_r()=0;
-       virtual void recv_R()=0;
+       virtual unsigned long send_R_r()=0;
+       virtual unsigned long recv_R()=0;  
 	   
        virtual void create_RBF_sender(synchGBF* r)=0; 
-       virtual void create_RBF_receiver(synchGBF* r)=0;	   
+       virtual void create_RBF_receiver(synchGBF* r)=0;	      
 	   
-       virtual void recv_func()=0;
-       virtual void send_func()=0; 
-
+       virtual unsigned long recv_func()=0;
+       virtual unsigned long send_func()=0; 
+	
        virtual int check_if_to_abort()=0;   
        virtual int check_if_to_abort1()=0;
-       virtual int check_if_to_abort2()=0;
+       virtual int check_if_to_abort2()=0; 
        
-       virtual void write_as_a_receiver(void* msg,unsigned long size)=0;
-       virtual int read_as_a_receiver(void* msg,unsigned long size)=0; 
-
-       virtual void write_as_a_sender(void* msg,unsigned long size)=0;
-       virtual int read_as_a_sender(void* msg,unsigned long size)=0; 
+       virtual unsigned long write_as_a_receiver(void* msg,unsigned long size)=0;
+       virtual unsigned long read_as_a_receiver(void* msg,unsigned long size)=0; 
+       virtual unsigned long write_as_a_sender(void* msg,unsigned long size)=0;
+       virtual unsigned long read_as_a_sender(void* msg,unsigned long size)=0;
 
        virtual void get_zeros_ones()=0;
        virtual void arrange_the_indexes()=0;
