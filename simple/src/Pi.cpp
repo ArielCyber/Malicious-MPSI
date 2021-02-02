@@ -36,6 +36,14 @@ Nc_sender(Nc),items(items),Not(Not),Nbf(Nbf),k(k),maxOnes(maxOnes),seeds_num(see
              Pi::init_sender(&senders[p-player-1], ports[p][0]);
 }
 
+void Pi::get_zeros_ones(){
+     arr_indexes=new vector<int>[2];
+     for (int i=0;i<Not;i++)
+         if ((*b)[i]==0) arr_indexes[0].push_back(i);
+         else arr_indexes[1].push_back(i);
+     delete b;
+}
+
 crypto* Pi::getCrypto(){
    return crypt;
 }
@@ -110,11 +118,11 @@ void Pi::set_sub_group(){
     cout<<"sub group was set"<<endl;
 }
 
-void Pi::send_sub_group(){
-
-    write_as_a_sender( &Nc_sender,sizeof(int));		   
-    write_as_a_sender( &seed_sub_group,sizeof(block));
+unsigned long Pi::send_sub_group(){
+    unsigned long sum=write_as_a_sender( &Nc_sender,sizeof(int));		   
+    sum+=write_as_a_sender( &seed_sub_group,sizeof(block));
     cout<<"sub group was sent"<<endl;
+    return sum;
 }
 
 
