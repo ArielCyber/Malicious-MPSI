@@ -31,7 +31,7 @@ void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr
     size[0]=arr_indexes[0].size();
     size[1]=arr_indexes[1].size();
 
-    //get random numbers 
+    //get Nbf random numbers 
     unsigned int* rand=new unsigned int [Nbf];
     crypt->gen_rnd((BYTE*)rand,4*Nbf);
 
@@ -52,13 +52,14 @@ void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr
            //placing the chosen index in the correct place according to the bloom filter
            indexes1[i]=(*indexes)[arr_indexes[bit][r]];
        
-           //moving the last index of the vector to the chosen index's place
+           //moving the last index of the vector to the chosen index's place- in order to not choose the same index again
            arr_indexes[bit][r]=arr_indexes[bit][size[bit]-1];
 		   
            //decreasing the size of the vector (one index was chosen)
            size[bit]--;
         }
     }
+    //if there are not enougth 0's/1's in the bitstring
     catch (const std::out_of_range& oor) {
        cout<<"Not enough "<<bit<<"s - problem!"<<endl;
        exit(1);
@@ -704,6 +705,7 @@ void functions::online_apport_receiver(Party* party, synchGBF* test){
     //party sends the injective func
     party->send_func();
 
+    //xoring the GBF
     party->create_RBF_receiver(test);
 }
 
@@ -720,6 +722,8 @@ void functions::online_apport_sender(Party* party, synchGBF* test){
 	
     //party receives the injective func and buildin
     party->recv_func();
+	
+    //xoring the GBF
     party->create_RBF_sender(test);
 
 }
@@ -888,10 +892,11 @@ void functions::get_values(string values_file,vector <int>& values){
  * @param commit the commitment
  * @param seed thes seed
  * @param player the number of the current player
+ * @param fout file for writing the amount of transfered data
 **/	
 
 
-void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed,int player){
+void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed,int player,fstream* fout){
 	
     //receiveng and sending seed and commit to each party
     Commit* commits_recv=new Commit[parties-1];
@@ -899,12 +904,16 @@ void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed
 	
     vector<thread*> threads;
 	
+    unsigned long data_recv=0;
+    unsigned long data_send=0;
+    std::mutex mu_recv;
+    std::mutex mu_send;  
     for (int p=0;p<parties;p++){
 	if (p==player) continue;
 	int place=p;
 	if (player<p) place=p-1;
-    	threads.push_back(new thread(functions::seeds_pi_write,pi,&commit,&seed,p));	
-        threads.push_back(new thread(functions::seeds_pi_read,pi,&commits_recv[place],&seeds_recv[place],p));		
+    	threads.push_back(new thread(functions::seeds_pi_write,pi,&commit,&seed,p,&data_send,&mu_send));	
+        threads.push_back(new thread(functions::seeds_pi_read,pi,&commits_recv[place],&seeds_recv[place],p,&data_recv,&mu_recv));		
     }
 	
     for (auto& t:threads) t->join();
@@ -921,8 +930,7 @@ void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed
     }				
 			
     if (flag==0) cout<<"commit is not ok"<<endl;
-
-    //calculating the common seed
+			
     for (int p=0;p<parties-1;p++){
 	seed=seed^seeds_recv[p];
     }
@@ -934,15 +942,21 @@ void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed
 }
 
 //helper function
-void functions::seeds_pi_write(Pi* pi,Commit* commit,block* seed,int party){
-    pi->write_to_player(party,commit,sizeof(Commit));
-    pi->write_to_player(party,seed,sizeof(block));
+void functions::seeds_pi_write(Pi* pi,Commit* commit,block* seed,int party,unsigned long* data,std::mutex* mu){
+    unsigned long sum=pi->write_to_player(party,commit,sizeof(Commit));
+    sum+=pi->write_to_player(party,seed,sizeof(block));
+    mu->lock();
+    (*data)+=sum;
+    mu->unlock();
 }
 
 //helper function
-void functions::seeds_pi_read(Pi* pi,Commit* commit,block* seed,int party){
-    pi->read_from_player(party,commit,sizeof(Commit));
-    pi->read_from_player(party,seed,sizeof(block));
+void functions::seeds_pi_read(Pi* pi,Commit* commit,block* seed,int party,unsigned long* data,std::mutex* mu){
+    unsigned long sum=pi->read_from_player(party,commit,sizeof(Commit));
+    sum+=pi->read_from_player(party,seed,sizeof(block));
+    mu->lock();
+    (*data)+=sum; 
+    mu->unlock();  
 }
 
 //#############
@@ -953,10 +967,11 @@ void functions::seeds_pi_read(Pi* pi,Commit* commit,block* seed,int party){
  * @param P0_s vector of pointers to the P0's objects 
  * @param commit the commitment
  * @param seed thes seed
+ * @param fout file for writing the amount of transfered data
 **/	
 
 
-void functions::seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& seed){
+void functions::seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& seed,fstream* fout){
 
     //arrays for the commits and seeds which will be received
     Commit* commits_recv=new Commit[P0_s.size()];
@@ -965,9 +980,13 @@ void functions::seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& 
     vector<thread*> threads;
 	
     //sending P0's seed and commit, and receiving it from the other parties
+    unsigned long bytes_rec=0;
+    unsigned long bytes_send=0;	
+    std::mutex m_rec;
+    std::mutex m_send;
     for (int p=0;p<(int)P0_s.size();p++){
-         threads.push_back(new thread(functions::seeds_p0_write,P0_s[p],&commit,&seed));
-	 threads.push_back(new thread(functions::seeds_p0_read,P0_s[p],&commits_recv[p],&seeds_recv[p]));
+         threads.push_back(new thread(functions::seeds_p0_write,P0_s[p],&commit,&seed,&bytes_send,&m_send));
+	 threads.push_back(new thread(functions::seeds_p0_read,P0_s[p],&commits_recv[p],&seeds_recv[p],&bytes_rec,&m_rec));
     }
 	
     for (auto& t:threads) t->join();
@@ -983,8 +1002,7 @@ void functions::seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& 
     }
 	
     if (flag==0) cout<<"commit is not ok"<<endl;
-
-    //computing the common seed
+			
     for (int i=0;i<(int)P0_s.size();i++){
 	seed=seed^seeds_recv[i];
     }
@@ -997,16 +1015,21 @@ void functions::seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& 
 }
 
 //helper function for sending the seed an commit to the other party
-void functions::seeds_p0_write(P0* p0,Commit* commit,block* seed){
-    p0->write_as_a_sender(commit,sizeof(Commit));
-    p0->write_as_a_sender(seed,sizeof(block));
-	
+void functions::seeds_p0_write(P0* p0,Commit* commit,block* seed,unsigned long* sum,std::mutex* mu){
+    unsigned long sum1=p0->write_as_a_sender(commit,sizeof(Commit));
+    unsigned long sum2=p0->write_as_a_sender(seed,sizeof(block));
+    mu->lock();
+    (*sum)=(*sum)+sum1+sum2;
+    mu->unlock();
 }
 
 //helper function for receiving the seed and commit from the other party
-void functions::seeds_p0_read(P0* p0,Commit* commit,block* seed){
-    p0->read_as_a_sender(commit,sizeof(Commit));
-    p0->read_as_a_sender(seed,sizeof(block));
+void functions::seeds_p0_read(P0* p0,Commit* commit,block* seed,unsigned long* sum,std::mutex* mu){
+    unsigned long sum1=p0->read_as_a_sender(commit,sizeof(Commit));
+    unsigned long sum2=p0->read_as_a_sender(seed,sizeof(block));
+    mu->lock();
+    (*sum)=(*sum)+sum1+sum2;
+    mu->unlock();
 }
 
 //##############
@@ -1042,10 +1065,11 @@ void functions::set_seed_commit(Commit& commit, block& seed,crypto* crypt){
  * @param player number of the current player
  * @param keys storage for the keys
  * @param keys_recv storage for the keys which will be received
+ * @param fout file for writing the amount of transfered data
 **/
 
 
-void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv){
+void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout){
 		
         unsigned long x1;
         unsigned long x2;
@@ -1060,6 +1084,12 @@ void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int play
 	vector<thread*> threads;
 	
         //sending and receiving the keys
+	
+        unsigned long sum_recv=0;
+        unsigned long sum_send=0;
+        std::mutex mu_recv;
+        std::mutex mu_send;    
+	
         for (int p=0;p<parties;p++){
 	    if (p==player) continue;
 	    int place=p;
@@ -1097,9 +1127,10 @@ void functions::secret_read(Pi* pi,int other_player,block* keys){
  * @param parties number of parties
  * @param keys array of keys
  * @param keys_recv array of keys_recv
+ * @param fout file for writing the amount of transfered data
 **/
 
-void functions::secret_sharing_seed_p0(vector <P0*>& p0_s,int parties,block* keys,block* keys_recv){
+void functions::secret_sharing_seed_p0(vector <P0*>& p0_s,int parties,block* keys,block* keys_recv,fstream* fout){
 	  
         unsigned long x1;
         unsigned long x2;
@@ -1115,6 +1146,11 @@ void functions::secret_sharing_seed_p0(vector <P0*>& p0_s,int parties,block* key
 	vector<thread*> threads;
 	
         //sending and receiving the keys
+        unsigned long sum_rec=0;
+        unsigned long sum_send=0;
+        std::mutex mu_rec;
+        std::mutex mu_send;	
+	
         for (int p=0;p<parties-1;p++){
 	    threads.push_back(new thread(functions::secret_read_p0,p0_s[p],&keys_recv[p]));
 	    threads.push_back(new thread(functions::secret_write_p0,p0_s[p],&keys[p]));					
@@ -1127,15 +1163,21 @@ void functions::secret_sharing_seed_p0(vector <P0*>& p0_s,int parties,block* key
 }
 
 //helper function to send the key
-void functions::secret_write_p0(P0* p0,block* keys){
-    p0->write_as_a_sender(keys,sizeof(block));
-    cout<<"block:"<<(*keys)<<" ";
+void functions::secret_write_p0(P0* p0,block* keys,unsigned long* sum,std::mutex* mu){
+    unsigned long sum1=p0->write_as_a_sender(keys,sizeof(block));
+    cout<<"sending block:"<<(*keys)<<" "<<"bytes:"<<sum1<<" "<<endl;
+    mu->lock();
+    (*sum)=(*sum)+sum1;
+    mu->unlock();
 }
 
 //helper function to receive the key
-void functions::secret_read_p0(P0* p0,block* keys){
-    p0->read_as_a_sender(keys,sizeof(block));
-    cout<<"block:"<<(*keys)<<" ";
+void functions::secret_read_p0(P0* p0,block* keys,unsigned long* sum,std::mutex* mu){
+    unsigned long sum1=p0->read_as_a_sender(keys,sizeof(block));
+    cout<<"receiving block:"<<(*keys)<<" "<<"bytes:"<<sum1<<" "<<endl;
+    mu->lock(); 
+    (*sum)=(*sum)+sum1;
+    mu->unlock();
 }
 
 //##############
