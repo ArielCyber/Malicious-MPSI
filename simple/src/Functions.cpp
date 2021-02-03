@@ -1105,16 +1105,21 @@ void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int play
 }
 
 //helper function
-void functions::secret_write(Pi* pi,int other_player,block* keys){
-    pi->write_to_player(other_player,keys,sizeof(block));
-    cout<<"write to "<<other_player<<" "<<*keys<<endl;
-
+void functions::secret_write(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu){
+    unsigned long sum1=pi->write_to_player(other_player,keys,sizeof(block));
+    cout<<"write to "<<other_player<<" "<<*keys<<" "<<"bytes:"<<sum1<<" "<<endl;
+    mu->lock();  
+    (*sum)=(*sum)+sum1; 
+    mu->unlock();   
 }
 
 //helper function
-void functions::secret_read(Pi* pi,int other_player,block* keys){
-    pi->read_from_player(other_player,keys,sizeof(block));
-    cout<<"read from "<<other_player<<" "<<*keys<<endl;
+void functions::secret_read(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu){
+    unsigned long sum1=pi->read_from_player(other_player,keys,sizeof(block));
+    cout<<"read from "<<other_player<<" "<<*keys<<" "<<"bytes:"<<sum1<<" "<<endl;
+    mu->lock();  
+    (*sum)=(*sum)+sum1;  
+    mu->unlock();    
 }
 
 //#############
@@ -1259,24 +1264,25 @@ std::chrono::steady_clock::time_point functions::get_duration(std::chrono::stead
  * @pararm test shared GBF
 **/
 
-void functions::get_gbf(P0* p0, synchGBF* test)
+void functions::get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player) {
 {	
-    int chunk_size=test->getChunkSize();	
+    int chunk_size=test->getChunkSize();
     block* chunkArr=new block[chunk_size];
     int n=P0::Nbf/chunk_size;
+    unsigned long sum=0;
 
     //getting the GBF from Pi and xoring it with the shared GBF
-    for (int i=0;i<n;i++)
-    {
-       p0->read_as_a_receiver(chunkArr,sizeof(block)*chunk_size);
+    for (int i=0;i<n;i++){
+       sum+= p0->read_as_a_receiver(chunkArr,sizeof(block)*chunk_size);
        test->XORchunk(chunkArr,i);
     }
 	
-    if (n*chunk_size<P0::Nbf)
-    {
-        p0->read_as_a_receiver(chunkArr,sizeof(block)*(P0::Nbf-n*chunk_size));
+    if (n*chunk_size<P0::Nbf){
+        sum+=p0->read_as_a_receiver(chunkArr,sizeof(block)*(P0::Nbf-n*chunk_size));
         test->XORchunk_limited(chunkArr,n,P0::Nbf-n*chunk_size);
-    }	
+    }
+	
+    data[player]=sum; 	
 }
 
 //#######
@@ -1289,20 +1295,26 @@ void functions::get_gbf(P0* p0, synchGBF* test)
  
 **/
 
-block* functions::compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test){
+block* functions::compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout){
 	
    //getting GBF from the other parties and xoring them
    vector <thread*> threads;
+   unsigned long* data=new unsigned long[P0_s.size()];   
+	
    for (int i=0;i<(int)P0_s.size();i++){
-        threads.push_back(new thread(functions::get_gbf,P0_s[i],test));	
-   }		
+        threads.push_back(new thread(functions::get_gbf1,P0_s[i],test,data,i));	
+   }	
 
    for (auto& t:threads) t->join();
    for (auto& t:threads) delete t;
    threads.clear();
 
-   return test->getGBF();		
+   delete [] data;    
+   return test->getGBF();
+	
 }
+	
+
 
 //################
 
@@ -1342,8 +1354,9 @@ block* functions::get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y,
     for (int i=0;i<items_size;i++)
          Y[i]=toBlock(0, 0);
   
-    block* M1=test->getGBF(); //M1=pi->get_RBF_sender();
-		
+    block* M1=test->getGBF(); 
+
+    //xoring 
     for(int i=0;i<items_size;i++)
        for (int j:h_kokhav[i])			
 	   Y[i]=Y[i]^M1[j];
@@ -1358,11 +1371,12 @@ block* functions::get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y,
  * @param pi pointer to the player
  * @param Nbf size of GBF
  * @param GBF1 the GBF
+ * @param fout file for writing the amount of transfered data
 **/
 
-void functions::comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1){
+void functions::comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout){
 	    
-    pi->write_as_a_sender(GBF1,sizeof(block)*Nbf);
+    (*fout)<<"sending gbf to p0,"<<(pi->write_as_a_sender(GBF1,sizeof(block)*Nbf))<<"\n";
     delete [] GBF1;
     std::cout<<"GBF1 deleted"<<std::endl;
     delete pi;
@@ -1380,6 +1394,6 @@ void functions::comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1){
  * @param numOfOnes numOfOnes to set
 **/
 void functions::creating_p0_instance(int party,int port,std::vector<P0*>* P0_s,uint32_t numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed ){
-                    cout<<"creating p0 for party "<<(party+1)<<endl; 
-                    (*P0_s)[party]=new P0(port,numOfOnes,m_nSecParam,constSeed); 
+     cout<<"creating p0 for party "<<(party+1)<<endl; 
+     (*P0_s)[party]=new P0(port,numOfOnes,m_nSecParam,constSeed); 
 }  
