@@ -6,7 +6,7 @@
 2) Run the command **sudo bash install.sh**
 
 3) After the installation, you should see that folder named **libOTe** was created.
-   Run the command **cp simple/* libOTe**
+   Run the command **** cp -r simple/* libOTe **
 
 
 
