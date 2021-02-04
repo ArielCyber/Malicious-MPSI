@@ -3,7 +3,7 @@
 
 1) Download the repository
 
-2) Run the command **sudo bash install.sh**
+2) Run the command 'sudo bash install.sh'
 
 3) After the installation, you should see that folder named **libOTe** has been created.
    <br>Run the command cp -r simple/* libOTe/
