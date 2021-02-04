@@ -261,11 +261,6 @@ int P0::check_if_to_abort2(){
     }
 }
 
-void P0::create_BF(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){
-    functions::create_BF( h_kokhav,*items, items_size, (*BF),Nbf,seeds_num,hash_seeds,seed);
-    cout<<"BF was created"<<endl;
-}
-
 void P0::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){
     functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds,seed);
     cout<<"BF was created"<<endl;     
