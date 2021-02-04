@@ -12,7 +12,7 @@
 
 5) Run the command `make`. A file named **bin/main** will be created.
 
-6) Change the ips in the file **ip.txt** to your computers' ip.
+6) Change the ips in the file **ip.txt** to your computers' ips.
 
 7) You should change the data in the data.txt, to the data of each party (comma separated numbers).
 
