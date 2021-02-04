@@ -7,7 +7,140 @@
 //#include <mutex>          // std::mutex
 //std::mutex mtx;           // mutex for critical section
 
-//#######
+
+/**
+ * replacing between 2 integers
+ *
+ * @param i first item
+ * @param j second item
+*/
+
+void swap_(int& i,int& j){
+     int temp =i;
+     i=j;
+     j=temp;
+}
+
+
+/**
+ * shuffling the indexes
+ *
+ * @param arr_indexes vector of indexes
+ * @param rand array of random vals
+*/
+
+
+void shuffling(vector<int>* arr_indexes,unsigned int* rand){
+
+     int i=((*arr_indexes).size()-1);
+
+     //exchanging the first element with random element
+     swap_((*arr_indexes)[0],(*arr_indexes)[(rand[i]%i)]);
+
+     //going over the vector from the last item to the second item
+     for (;i>0;i--){
+         //exchanging the currnt item with a random items at places [0..current)
+         swap_((*arr_indexes)[i],(*arr_indexes)[(rand[i]%i)]);
+      }
+
+     delete [] rand;
+}
+
+
+/**
+ * placing the indexes of 0's and 1's into 2 vectors, and shuffling them
+ * 
+ * @param bitvector vector of bits
+ * @param Not size of the bitvector
+ * @param arr_indexes array for the 2 vectors- one for the 0's indexes and one one for the 1's indexes
+ * @param crypt crypthographic var 
+*/
+
+void functions::get_zeros_ones(BitVector* bitvector, int Not, vector<int>*& arr_indexes,crypto *crypt){
+
+     //establishing 2 vectors of the 0's/1's indexes	
+     arr_indexes=new vector<int>[2];
+     for (int i=0;i<Not;i++)
+         if ((*bitvector)[i]==0) arr_indexes[0].push_back(i);
+         else arr_indexes[1].push_back(i);
+     delete bitvector;
+	
+     //getting random vals
+     unsigned int* rand0=new unsigned int [arr_indexes[0].size()];  
+     unsigned int* rand1=new unsigned int [arr_indexes[1].size()];  
+ 
+     crypt->gen_rnd((BYTE*)rand0,4*arr_indexes[0].size());
+     crypt->gen_rnd((BYTE*)rand1,4*arr_indexes[1].size());
+
+     //shuffling the vectors
+     thread* t1=new thread(shuffling,&arr_indexes[0],rand0);
+     thread* t2=new thread(shuffling,&arr_indexes[1],rand1);  
+     t1->join();
+     t2->join();
+     delete t1;
+     delete t2;
+}
+
+
+/**
+ * placing the indexes of 0's and 1's into 2 vectors, and shuffling them
+ * 
+ * @param BF Bloom filter
+ * @param Nbf Bloom filter's size
+ * @param new_indexes array for the new indexes
+ * @param current_indexes array of the current indexes
+ * @param one_indexes vector of the 1's indexes
+ * @param zero_indexes vector of the 0's indexes
+ * @param flag_starting_from 0-for starting from the beginning 1-for starting from the ending
+ * @param place_0 the place of the current index int the 0's vector
+ * @param place_1 the place of the current index int the 1's vector 
+ */
+
+
+void functions::arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_indexes,int* current_indexes,vector<int>* one_indexes,vector<int>* zero_indexes,int flag_starting_from,int* place_0,int* place_1){
+
+     //starting from the beginning of the BF/vectors
+     if (flag_starting_from==0){
+	     
+	//going over the first half of the BF
+        for (int i=0;i<(Nbf/2);i++){
+             try{
+                 //getting the current bit and fetching the index which will represent it
+                 if ((*BF).get_bit(i)==0)
+                    new_indexes[i]=current_indexes[(*zero_indexes)[(*place_0)++]];
+                 else
+                    new_indexes[i]=current_indexes[(*one_indexes)[(*place_1)++]];
+             }
+             catch (const std::out_of_range& oor) {
+		 cout<<"Not enough "<<(*BF).get_bit(i)<<"s - problem!"<<endl;
+                 exit(1);
+             }  
+        }
+        
+     }
+	
+     //starting from the ending of the BF/vectors    
+     else{
+	   
+	//going over the second half of the BF
+        for (int i=(Nbf/2);i<Nbf;i++){
+             try{   
+		 //getting the current bit and fetching the index which will represent it   
+                 if ((*BF).get_bit(i)==0)
+                    new_indexes[i]=current_indexes[(*zero_indexes)[(*place_0)--]];       
+                 else
+                    new_indexes[i]=current_indexes[(*one_indexes)[(*place_1)--]];
+             }
+             catch(const std::out_of_range& oor) {
+                 cout<<"Not enough "<<(*BF).get_bit(i)<<"s - problem!"<<endl;    
+                 exit(1); 
+             }   
+        }
+     }
+}
+
+
+
 /**
  * Ordering the strings indexes in this way-
  * if in the Bloom filter at place '0' there is the bit '1',
@@ -21,52 +154,35 @@
  * @param Ncc size of group C
  * @param crypt cryptographic var
  */
-	
+
 	
 void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt){
-
-
-    //get the 0's and 1's sizes
-    int size[2];
-    size[0]=arr_indexes[0].size();
-    size[1]=arr_indexes[1].size();
-
-    //get Nbf random numbers 
-    unsigned int* rand=new unsigned int [Nbf];
-    crypt->gen_rnd((BYTE*)rand,4*Nbf);
-
-    //arranging the indexes
+ 
+    //array for the new indexes
     int* indexes1=new int[Nbf];
-    
-    int bit=-1;
-		    
-    try{
-        for (int i=0;i<Nbf;i++){
+ 
+    //the starting place for going over the vectors
+    int place_0_begin=0;
+    int place_0_end=arr_indexes[0].size()-1;
+    int place_1_begin=0;
+    int place_1_end=arr_indexes[1].size()-1;
 
-           //getting the bit
-           bit=BF.get_bit(i);
+    //building shuffled vectors of 0's and 1's inedexes
+    thread* t1=new thread(functions::arrange_indexes_thread,&BF,Nbf,indexes1,*indexes,&arr_indexes[1],&arr_indexes[0],0,&place_0_begin,&place_1_begin);
+    thread* t2=new thread(functions::arrange_indexes_thread,&BF,Nbf,indexes1,*indexes,&arr_indexes[1],&arr_indexes[0],1,&place_0_end,&place_1_end);
 
-           //getting random number in the range 0..size of 0's/1's indexes' vector
-           int r=rand[i]%size[bit];
-	   
-           //placing the chosen index in the correct place according to the bloom filter
-           indexes1[i]=(*indexes)[arr_indexes[bit][r]];
-       
-           //moving the last index of the vector to the chosen index's place- in order to not choose the same index again
-           arr_indexes[bit][r]=arr_indexes[bit][size[bit]-1];
-		   
-           //decreasing the size of the vector (one index was chosen)
-           size[bit]--;
-        }
-    }
-    //if there are not enougth 0's/1's in the bitstring
-    catch (const std::out_of_range& oor) {
-       cout<<"Not enough "<<bit<<"s - problem!"<<endl;
+    t1->join();
+    t2->join();
+    delete t1;
+    delete t2;
+
+    //checking that there was enougth indexes for the 0's/1's
+    if (((place_0_begin-1)>=(place_0_end+1)) || ((place_1_begin-1)>=(place_1_end+1))){
+       cout<<"Not enough o's/1's - problem!"<<endl;
        exit(1);
-    }
+   }
 
     delete [] arr_indexes;	
-    delete [] rand;
     delete [] (*indexes);	
 
     (*indexes)=indexes1;	
@@ -74,8 +190,6 @@ void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr
     cout<<"arrange_the_indexes complete!"<<endl;
 }
 
-
-//#######
 
 /**
  * Calculating hash seeds using AES function and our common seed as key
@@ -93,8 +207,8 @@ unsigned int* functions::get_seeds(int seeds_num, block seed){
 	
     block* plaintexts = new block[seeds_num];
     for (int i=0;i<seeds_num;i++)
-         plaintexts[i]=toBlock(0,i);
-	
+    plaintexts[i]=toBlock(0,i);
+
     block* ciphertexts= new block[seeds_num];
 	
     aes.ecbEncBlocks(plaintexts, seeds_num, ciphertexts);
@@ -252,21 +366,18 @@ void functions::get_sub_group(int sub_group[],int big_group_size,int small_group
                    i^=1;
                    if (i==0) j++;
                    if (j==size) std::cout<<"out of randoms"<<std::endl;      
-         }                                                                                                                                                                                                                                                                                                                                                        
-
-         delete [] ciphertexts;           
-		 
-         std::cout<<"setting the vals to the sub group"<<std::endl;   
-         i=0;
-	 for (auto item:(*s)){
+        }                                                                                                                                                                                                                                                                                                                                                                                 delete [] ciphertexts;
+       	 
+        std::cout<<"setting the vals to the sub group"<<std::endl;   
+        i=0;
+	for (auto item:(*s)){
 		   sub_group[i++]=item;    
-	 }
+	}
 		
-         delete s;  		 
+        delete s;  		 
 
 }
 
-//#######
 
 /**
  * computing r*
@@ -282,7 +393,7 @@ void functions::compute_r(block& r,std::vector<std::array<block, 2>>& strings,in
     r=strings[indexes[0]][0];
 	
     for (int i=1;i<indexes_size;i++){
-	     r=r^strings[indexes[i]][0];	
+	 r=r^strings[indexes[i]][0];		
     }	
 }
 
@@ -307,8 +418,7 @@ bool compare_func(int x,int y){
      return (x>y);
 }
 
-void functions::compute_R_r(  int* sub_group,int* indexes,BitVector* b,int Ncc,int Not, std::vector<block>& strings, block& r, std::vector <int> &R){
-	
+void functions::compute_R_r(  int* sub_group,int* indexes,BitVector* b,int Ncc,int Not, std::vector<block>& strings, block& r, std::vector <int> &R){	
    //setting 0 to r
    r=toBlock(0,0);
    int ind=Not-1;
@@ -350,7 +460,6 @@ void functions::compute_R_r(  int* sub_group,int* indexes,BitVector* b,int Ncc,i
     cout <<"Ncc - R ="<<Ncc-R.size()<<endl;
 }
 
-//#######
 
 /**
  * checking if the 2 sets are disjoint
@@ -383,8 +492,6 @@ int functions::if_disjoint_sets(int* cc,int Ncc, int* indexes,int Nbf,int Not){
 }
 
 
-
-// ##########
 /**
  * filling the GBF
  *
@@ -399,14 +506,13 @@ int functions::if_disjoint_sets(int* cc,int Ncc, int* indexes,int Nbf,int Not){
 **/
 
 block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test){
-
     auto start = std::chrono::steady_clock::now();  
 
     //creating Y's array
     Y=new block[items.size()];
 
     auto med = std::chrono::steady_clock::now();    
-    std::cout<<"Get_Y time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;        
+    std::cout<<"Get_Y time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;         
 
     //setting 0's to Y's array
     for (int i=0;i<(int)items.size();i++)
@@ -494,7 +600,6 @@ block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , i
 **/
 
 block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test){
-
     auto start = std::chrono::steady_clock::now();
     
     //setting the Y's array
@@ -519,7 +624,7 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
 
         set<int>::iterator begin=h_kokhav[i].begin();
         set<int>::iterator end=h_kokhav[i].end();
-		
+	    
 	//going over the indexes of h* of item i
         for (;begin!=end;begin++){		
 	    int j=(*begin);
@@ -530,14 +635,15 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
 	            finalInd=j;
 	        else{
                     //setting random val
+
 	            unsigned long* x1=new unsigned long;
 	            unsigned long* x2=new unsigned long;
 	            crypt->gen_rnd((BYTE*)x1,8); 
 	            crypt->gen_rnd((BYTE*)x2,8);
 	            GBF[j]=block(*x1,*x2);
 	            finalShare=finalShare^GBF[j];
-				delete x1;
-				delete x2;
+		    delete x1;
+		    delete x2;
 	        }
 	    }
 			 
@@ -571,13 +677,11 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
 	}
     auto end = std::chrono::steady_clock::now();
     std::cout<<"GBF putting random strings time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;
-    
 	
     delete [] Y;
     return GBF;
 }
 
-//#######
 
 /**
  * checking if the item is in the item's list
@@ -586,7 +690,7 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
  * @param GBF
 **/
 
-block* functions::check_the_item(set<int>& h_kokhav,block* GBF){
+block* functions::check_the_item(set<int>& h_kokhav,int bytes, int Nbf,block* GBF){
 	
     block* y=new block(0,0);
 
@@ -600,7 +704,6 @@ block* functions::check_the_item(set<int>& h_kokhav,block* GBF){
     return y;
 }
 
-//############
 
 /**
  * performing offline apport as a receiver
@@ -614,6 +717,8 @@ block* functions::check_the_item(set<int>& h_kokhav,block* GBF){
 
 void functions::offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player,fstream* fout,std::mutex* mu){
 
+   std::cout<<"starting offline apport receiver"<<std::endl;	
+   
    string str=(*ips)[other_player];
    str.append(":");
    if (player==0)
@@ -636,7 +741,7 @@ void functions::offline_apport_receiver(Party* party,std::vector<std::string>* i
        //computing the R group and r* and sending them
        party->compute_R_r();
        party->send_R_r();
-       party->get_zeros_ones(); 
+       party->get_zeros_ones();
 
    }
 
@@ -658,9 +763,10 @@ void functions::offline_apport_receiver(Party* party,std::vector<std::string>* i
  * @param crypt_ parameter for the OT protocol
 **/
 
-void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player){
+void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu){
 
-    //std::cout<<"starting offline apport sender"<<std::endl;
+    std::cout<<"starting offline apport sender"<<std::endl;
+	
     string str1=(*ips)[player];
     cout<<str1;
     str1.append(":");
@@ -688,7 +794,6 @@ void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips
 
 }
 
-//############
 
 /**
  * performing online apport as a receiver- 
@@ -697,7 +802,7 @@ void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips
  * @param Party pointer to the party object
 **/
 
-void functions::online_apport_receiver(Party* party, synchGBF* test){
+void functions::online_apport_receiver(Party* party, synchGBF* test, fstream* fout,std::mutex* mu){
 
     //party arranging the indexes of the initial bitstring accordingly to the bloom filter bits
     party->arrange_the_indexes();
@@ -709,7 +814,6 @@ void functions::online_apport_receiver(Party* party, synchGBF* test){
     party->create_RBF_receiver(test);
 }
 
-//############
 
 /**
  * performing online apport as a sender-
@@ -718,39 +822,37 @@ void functions::online_apport_receiver(Party* party, synchGBF* test){
  * @param Party pointer to the party object
 **/
 
-void functions::online_apport_sender(Party* party, synchGBF* test){
+void functions::online_apport_sender(Party* party, synchGBF* test,fstream* fout,std::mutex* mu){
 	
     //party receives the injective func and buildin
     party->recv_func();
 	
     //xoring the GBF
     party->create_RBF_sender(test);
-
 }
 
-//#############
+
 /**
  * running online apport as a sender and as a receiver
  *
  * @param Party pointer to the party object
 **/
 
-void functions::run_online_apport(Party* p0, synchGBF* test){
+void functions::run_online_apport(Party* p0, synchGBF* test,fstream* fout,std::mutex* mu ){
 
     //online apport receiver
-    thread* t1=new thread(functions::online_apport_receiver,p0, test);
+    thread* t1=new thread(functions::online_apport_receiver,p0, test,fout,mu);
     //online apport sender
-    thread* t2=new thread(functions::online_apport_sender,p0, test);	
+    thread* t2=new thread(functions::online_apport_sender,p0, test,fout,mu);	
 	
     t1->join();
     t2->join();
 	
     delete t1;
-    delete t2;
-	
+    delete t2;	
 }
 
-//#############
+
 /**
  * running offline apport as a sender and as a receiver
  *
@@ -762,12 +864,12 @@ void functions::run_online_apport(Party* p0, synchGBF* test){
 **/
 
 
-void functions::run_offline_apport(Party* p0,std::vector <std::string>* ips,int** ports,int player,int other_player){
-			
+void functions::run_offline_apport(Party* p0,std::vector <std::string>* ips,int** ports,int player,int other_player,fstream* fout,std::mutex* mu){			
+
     //running offline apport receiver    
-    thread* t1=new thread(functions::offline_apport_receiver,p0,ips,ports,player,other_player);
+    thread* t1=new thread(functions::offline_apport_receiver,p0,ips,ports,player,other_player,fout,mu);
     //running offline apport sender
-    thread* t2=new thread(functions::offline_apport_sender,p0,ips,ports,player,other_player);
+    thread* t2=new thread(functions::offline_apport_sender,p0,ips,ports,player,other_player,fout,mu);
 	
     t1->join();
     t2->join();
@@ -777,7 +879,6 @@ void functions::run_offline_apport(Party* p0,std::vector <std::string>* ips,int*
 
 }
 
-//#############
 
 /**
  * setting ports to connect with the other players
@@ -795,7 +896,6 @@ void functions::set_ports(int** ports,int player,int parties){
     }
 }
 
-//#############
 
 /**
  * getting the ip's of all the players
@@ -823,7 +923,6 @@ void functions::set_ips(std::vector <string>& ips,string file, int* parties){
     }	
 }
 
-//#############
 
 /**
  * getting the protocol's parameterd from configuration file
@@ -865,7 +964,6 @@ void functions::read_protocol_parameters(const char* cfg_file,uint32_t* seeds,ui
 	
 }
 
-//##############
 
 /**
  * getting the DB of the party from the data file (comma separated)
@@ -919,6 +1017,9 @@ void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed
     for (auto& t:threads) t->join();
     for (auto& t:threads) delete t;
     threads.clear();
+
+    (*fout)<<"sending seed+commit to the other parties,"<<data_send<<"\n";
+    (*fout)<<"receiving seed+commit to the other parties,"<<data_recv<<"\n";       
 			
     int flag=1;
     int j=0;
@@ -941,6 +1042,7 @@ void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed
     delete [] seeds_recv;
 }
 
+
 //helper function
 void functions::seeds_pi_write(Pi* pi,Commit* commit,block* seed,int party,unsigned long* data,std::mutex* mu){
     unsigned long sum=pi->write_to_player(party,commit,sizeof(Commit));
@@ -959,7 +1061,6 @@ void functions::seeds_pi_read(Pi* pi,Commit* commit,block* seed,int party,unsign
     mu->unlock();  
 }
 
-//#############
 
 /**
  * agreement phase of p0 - sending and receiving commit+key , checking if the received objects are ok , ans than computing common seed
@@ -992,6 +1093,9 @@ void functions::seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& 
     for (auto& t:threads) t->join();
     for (auto& t:threads) delete t;
     threads.clear();
+
+    (*fout)<<"sending seed+commit to the other parties,"<<bytes_send<<"\n";   
+    (*fout)<<"receiving seed+commit from the other parties,"<<bytes_rec<<"\n"; 
 	
     //checking that the commits and seeds which has been received are OK
     int flag=1;
@@ -1032,7 +1136,6 @@ void functions::seeds_p0_read(P0* p0,Commit* commit,block* seed,unsigned long* s
     mu->unlock();
 }
 
-//##############
 
 /**
  * creating seed using Crypto var and creating commit using the seed
@@ -1069,9 +1172,9 @@ void functions::set_seed_commit(Commit& commit, block& seed,crypto* crypt){
 **/
 
 
-void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout){
-		
-        unsigned long x1;
+void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout){		
+
+	unsigned long x1;
         unsigned long x2;
 		
         //generating keys
@@ -1088,21 +1191,25 @@ void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int play
         unsigned long sum_recv=0;
         unsigned long sum_send=0;
         std::mutex mu_recv;
-        std::mutex mu_send;    
-	
+        std::mutex mu_send;     
+
         for (int p=0;p<parties;p++){
 	    if (p==player) continue;
 	    int place=p;
 	    if (p>player) place=p-1;
-	    threads.push_back(new thread(functions::secret_read,pi,p,&keys_recv[place]));
-	    threads.push_back(new thread(functions::secret_write,pi,p,&keys[place]));					
+	    threads.push_back(new thread(functions::secret_read,pi,p,&keys_recv[place],&sum_recv,&mu_recv));
+	    threads.push_back(new thread(functions::secret_write,pi,p,&keys[place],&sum_send,&mu_send));					
 	}
-	
+
+  	
         for (auto& t:threads) t->join();
 	for (auto& t:threads) delete t;
 	threads.clear();
-	
+
+        (*fout)<<"secret sharing: sending keys,"<<sum_send<<"\n";    
+        (*fout)<<"secret sharing: receiving keys,"<<sum_recv<<"\n";   		
 }
+
 
 //helper function
 void functions::secret_write(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu){
@@ -1122,7 +1229,6 @@ void functions::secret_read(Pi* pi,int other_player,block* keys,unsigned long* s
     mu->unlock();    
 }
 
-//#############
 
 /**
  * secret sharing- p0 generates keys using the crypto var
@@ -1142,6 +1248,7 @@ void functions::secret_sharing_seed_p0(vector <P0*>& p0_s,int parties,block* key
 		
         //generating keys
         for (int i=0;i<(parties-1);i++){
+
             crypto* crypt=p0_s[i]->getCrypto();
             crypt->gen_rnd((BYTE*)&x1,8);
             crypt->gen_rnd((BYTE*)&x2,8);
@@ -1155,16 +1262,17 @@ void functions::secret_sharing_seed_p0(vector <P0*>& p0_s,int parties,block* key
         unsigned long sum_send=0;
         std::mutex mu_rec;
         std::mutex mu_send;	
-	
+
         for (int p=0;p<parties-1;p++){
-	    threads.push_back(new thread(functions::secret_read_p0,p0_s[p],&keys_recv[p]));
-	    threads.push_back(new thread(functions::secret_write_p0,p0_s[p],&keys[p]));					
+	    threads.push_back(new thread(functions::secret_read_p0,p0_s[p],&keys_recv[p],&sum_rec,&mu_rec));
+	    threads.push_back(new thread(functions::secret_write_p0,p0_s[p],&keys[p],&sum_send,&mu_send));					
 	}
-	
+
         for (auto& t:threads) t->join();
 	for (auto& t:threads) delete t;
 	threads.clear();
-	
+
+        (*fout)<<"secret sharing- sending keys,"<<sum_send<<"\n"<<"secret sharing- receiving keys,"<<sum_rec<<"\n";  	
 }
 
 //helper function to send the key
@@ -1198,8 +1306,7 @@ void functions::secret_read_p0(P0* p0,block* keys,unsigned long* sum,std::mutex*
   * @param keys_recv the other parties keys
 **/
   
-void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv)	{	
-	
+void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv){		
      auto start = std::chrono::steady_clock::now();
      block* r=test->getGBF();
 	
@@ -1211,13 +1318,13 @@ void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block
 
      //creating the "mesages"	
      for (unsigned int i=0;i<Nbf;i++){
-	     plaintexts[i]=toBlock(0,i);
-	     r[i]=toBlock(0,0);
+	 plaintexts[i]=toBlock(0,i);
+	 r[i]=toBlock(0,0);
      }
 
     auto med = std::chrono::steady_clock::now();
     std::cout<<"Secret-sharing setup time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
-
+	
     //activating AES and xoring the secrets
     for (int p=0;p<(parties-1);p++) {
 	    aes->setKey(keys[p]);
@@ -1226,7 +1333,7 @@ void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block
 	    aes->setKey(keys_recv[p]);
 	    aes->ecbEncBlocks(plaintexts, Nbf, ciphertexts);	
 	    for (unsigned int i=0;i<Nbf;i++) r[i]=r[i]^ciphertexts[i];
-     }	
+    }	
 
     auto end = std::chrono::steady_clock::now();
     std::cout<<"Secret-sharing time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;	
@@ -1237,10 +1344,9 @@ void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block
     delete [] plaintexts;
     delete [] ciphertexts;
     delete aes;
-	   	
+	      	
 }
 
-//##############
 
 /**
  * writing the duration of the step
