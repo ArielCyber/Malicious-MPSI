@@ -318,8 +318,8 @@ public:
 
 namespace functions{
 
+    void arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_indexes,int* current_indexes,vector<int>* one_indexes,vector<int>* zero_indexes,int flag_starting_from,int* place_0,int* place_1);
     void arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt);
-    void create_BF(std::set<int>* h_kokhav,std::vector <int>& items, int len, Bitstring& BF, int Nbf,int seeds_num, unsigned int* seeds, block seed);
     void get_sub_group(int* ,int,int,block&);
     void compute_r(block& r,std::vector<std::array<block, 2>>& strings,int* indexes,int indexes_size); 
     void compute_R_r( int* sub_group,int* indexes,BitVector* b,int Ncc,int Not, std::vector<block>& strings, block& r, std::vector <int> &R);
@@ -328,6 +328,7 @@ namespace functions{
     block* re_randomization(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* r);
     block* re_randomization_zero(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test);
     block* check_the_item(set<int>& h_kokhav,int bytes, int Nbf,block* GBF);
+
 
     void offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player,fstream* fout,std::mutex* mu);
     void offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu);
@@ -363,18 +364,17 @@ namespace functions{
     void get_intersection( std::set<int>* h_kokhav,int bytes,block* GBF);
     block* get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y, synchGBF* test);
     void comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout);
+
+    void get_zeros_ones(BitVector* b, int Not, vector<int>*& arr_indexes,crypto *crypt);
 	
-    block* compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);
     block* compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);  
 	
-    void get_gbf(P0* p0, synchGBF* test,unsigned long* data,int player,std::mutex** turn,std::queue<Gbf_seg*>** stack_arr,semaphore** sem);
     void get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player);
 	
     void secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout);
     void secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv);
  	
     void creating_p0_instance(int party,int port,std::vector<P0*>* P0_s,uint32_t numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed );
-    void xor_chunk(int j,int parties,mutex** turn,std::queue<Gbf_seg*>** stack_arr,semaphore** sem);
 
     void bf_thread(int seeds_num,std::set<int>* h_kokhav,Bitstring* BF,details::AES<details::AESTypes::NI>* aes,int start,int end,int encNum,std::vector <int>* items, int Nbf);
     void create_BF_threads(std::set<int>* h_kokhav,std::vector <int>* items, int len, Bitstring* BF, int Nbf,int seeds_num, unsigned int* seeds, block seed);
