@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         fstream fout_com;
         fout_com.open("com.csv", ios::out);
 
-        synchGBF* test=new synchGBF(Nbf);
+        synchGBF* test=new synchGBF(Nbf,256);
   
   
 	//if p0
