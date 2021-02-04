@@ -17,9 +17,9 @@
 
 7) You should change the data in the data.txt, to the data of each party (comma separated numbers).
 
-8) You can change the parameters at the **cfg.txt** file.
+8) You can change the parameters in the **cfg.txt** file.
 
 9) To activate the protocol-
    <br> Run at every computer the command `./bin/main <party number> cfg.txt`.
-   <br> The number of each party is different and need to be chosen from {0..(parties-1)}
+   <br> The number of each party has to be different and from this range {0..(parties-1)}
 
