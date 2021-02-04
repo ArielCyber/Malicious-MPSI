@@ -5,7 +5,7 @@
 
 2) Run the command `sudo bash install.sh`
 
-3) After the installation, you should see that folder named **libOTe** has been created.
+3) After the installation, you should see that a folder named **libOTe** has been created.
    <br>Run the command `cp -r simple/* libOTe/`
  
 4) Go to the **libOTe** folder, by using the command `cd libOTe`
