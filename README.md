@@ -1,7 +1,7 @@
 # Malicious_MPSI
 
 
-1) Download the repository
+1) Clone the repository `git clone https://github.com/ArielCyber/Malicious_MPSI.git`
 
 2) Run the command `sudo bash install.sh`
 
