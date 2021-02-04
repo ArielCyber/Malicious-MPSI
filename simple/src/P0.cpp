@@ -44,11 +44,7 @@ int P0::maxOnes=0;
 std::vector<int>* P0::items=nullptr; 
 
 void P0::get_zeros_ones(){
-     arr_indexes=new vector<int>[2];
-     for (int i=0;i<Not;i++)
-         if ((*bitvector)[i]==0) arr_indexes[0].push_back(i);
-         else arr_indexes[1].push_back(i);
-     delete bitvector;
+     functions::get_zeros_ones(bitvector, P0::Not,arr_indexes,crypt);
 }
 
 void P0::set_items(std::vector<int>* items,int items_size){
