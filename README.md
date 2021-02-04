@@ -14,5 +14,10 @@
 
 6) Change the ips in the file **ip.txt** to your computers' ip.
 
+7) You should change the data in the data.txt, to the data of each party (comma separated numbers).
 
+8) You can change the parameters at the **cfg.txt** file.
+
+9) Run at every computer the command **./bin/main <party number> cfg.txt**.
+   The number od each party is different and need to be chosen from {0..(parties-1)}
 
