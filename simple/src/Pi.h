@@ -69,7 +69,6 @@ public:
        int check_if_to_abort1();
        int check_if_to_abort2();
 	
-       void create_BF(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed);
        void create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed);
        void create_RBF_sender(synchGBF* r);
 	   
