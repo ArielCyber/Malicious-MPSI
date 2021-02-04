@@ -13,7 +13,8 @@
 
 5) Run the command `make`. A file named **bin/main** will be created.
 
-6) Change the ips in the file **ip.txt** to your computers' ips.
+6) Change the ips in the file **ip.txt** to the partiess' ips.
+   <br> Each party will get a number in range [0..(parties-1)], accordingly the order at ip.txt
 
 7) You should change the data in the data.txt, to the data of each party (comma separated numbers).
 
@@ -21,5 +22,4 @@
 
 9) To activate the protocol-
    <br> Run at every computer the command `./bin/main <party number> cfg.txt`.
-   <br> The number of each party must to be unique and from the range {0..(parties-1)}
 
