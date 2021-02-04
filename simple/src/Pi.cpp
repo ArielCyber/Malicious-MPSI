@@ -36,12 +36,9 @@ Nc_sender(Nc),items(items),Not(Not),Nbf(Nbf),k(k),maxOnes(maxOnes),seeds_num(see
              Pi::init_sender(&senders[p-player-1], ports[p][0]);
 }
 
+
 void Pi::get_zeros_ones(){
-     arr_indexes=new vector<int>[2];
-     for (int i=0;i<Not;i++)
-         if ((*b)[i]==0) arr_indexes[0].push_back(i);
-         else arr_indexes[1].push_back(i);
-     delete b;
+     functions::get_zeros_ones(b, Not,arr_indexes,crypt);
 }
 
 crypto* Pi::getCrypto(){
