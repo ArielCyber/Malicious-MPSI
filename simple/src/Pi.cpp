@@ -206,13 +206,7 @@ int Pi::check_if_to_abort2(){
         return 0;	
     }
 }
-
-void Pi::create_BF(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){
-    BF=new Bitstring(Nbf);
-    functions::create_BF( h_kokhav,items, items_size, *BF,Nbf,seeds_num,hash_seeds, seed);
-    cout<<"length:"<<BF->get_bit(0)<<endl;
-    cout<<"BF was created"<<endl;
-}	
+	
 
 void Pi::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){  
     BF=new Bitstring(Nbf); 
