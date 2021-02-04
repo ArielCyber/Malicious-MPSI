@@ -1,0 +1,8 @@
+seeds=147
+Nbf=64733
+Not=74379
+NumOfOnes=32886
+Nc=7473
+Nr=3627
+Data_file=data.txt
+IP_file=ip.txt
