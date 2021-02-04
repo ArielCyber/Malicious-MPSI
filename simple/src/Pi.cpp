@@ -437,8 +437,7 @@ Pi::~Pi(){
    if (RBF_recv!=nullptr) delete [] RBF_recv;
    std::cout<<"deleting RBF_sender"<<std::endl;	 
    if (RBF_sender!=nullptr) delete [] RBF_sender;
-   std::cout<<"deleting b"<<std::endl;	 	 
-   if (b!=nullptr) delete b;
+
 }
 
 
