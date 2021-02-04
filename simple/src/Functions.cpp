@@ -1361,7 +1361,6 @@ std::chrono::steady_clock::time_point functions::get_duration(std::chrono::stead
     return end;
 }
 
-//##############
 
 /**
  * receiving GBF1_STAR from the opponent players and xoring the with the shared GBF
@@ -1371,7 +1370,7 @@ std::chrono::steady_clock::time_point functions::get_duration(std::chrono::stead
 **/
 
 void functions::get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player) {
-{	
+
     int chunk_size=test->getChunkSize();
     block* chunkArr=new block[chunk_size];
     int n=P0::Nbf/chunk_size;
@@ -1388,10 +1387,10 @@ void functions::get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player) 
         test->XORchunk_limited(chunkArr,n,P0::Nbf-n*chunk_size);
     }
 	
-    data[player]=sum; 	
+    data[player]=sum;   
 }
 
-//#######
+
 /**
  * COMPUTING P0's GBF
  *
@@ -1405,24 +1404,22 @@ block* functions::compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fs
 	
    //getting GBF from the other parties and xoring them
    vector <thread*> threads;
-   unsigned long* data=new unsigned long[P0_s.size()];   
-	
+   unsigned long* data=new unsigned long[P0_s.size()];  
+   
    for (int i=0;i<(int)P0_s.size();i++){
         threads.push_back(new thread(functions::get_gbf1,P0_s[i],test,data,i));	
-   }	
-
+   }
    for (auto& t:threads) t->join();
    for (auto& t:threads) delete t;
    threads.clear();
 
+   for (int i=0;i<(int)P0_s.size();i++){        
+        (*fout)<<"receiving gbf from player number "<<(i+1)<<","<<data[i]<<'\n';
+   }
    delete [] data;    
    return test->getGBF();
-	
 }
 	
-
-
-//################
 
 /**
  * going over the indexes of each h*, xoring them, and checking if the sum is 0. If it is-print the item.
@@ -1433,7 +1430,7 @@ block* functions::compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fs
 **/
 
 void functions::get_intersection( std::set<int>* h_kokhav,int bytes,block* GBF){
-   
+	
    cout<<"The intersection: ";
    for (int t=0;t<P0::items_size;t++){
 	block* y=functions::check_the_item(h_kokhav[t],bytes, P0::Nbf,GBF);
@@ -1445,7 +1442,6 @@ void functions::get_intersection( std::set<int>* h_kokhav,int bytes,block* GBF){
 }
 
 
-//##############
 /**
  * computing codewords
  *
@@ -1460,7 +1456,7 @@ block* functions::get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y,
     for (int i=0;i<items_size;i++)
          Y[i]=toBlock(0, 0);
   
-    block* M1=test->getGBF(); 
+    block* M1=test->getGBF();
 
     //xoring 
     for(int i=0;i<items_size;i++)
@@ -1470,7 +1466,7 @@ block* functions::get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y,
     return Y;
 }
 
-//##############
+
 /**
  * sending the GBF of pi to p0
  *
@@ -1489,8 +1485,6 @@ void functions::comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout){
 }
 		
 
-
-//##############
 /**
  * creating P0's instances
  *
@@ -1500,6 +1494,6 @@ void functions::comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout){
  * @param numOfOnes numOfOnes to set
 **/
 void functions::creating_p0_instance(int party,int port,std::vector<P0*>* P0_s,uint32_t numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed ){
-     cout<<"creating p0 for party "<<(party+1)<<endl; 
-     (*P0_s)[party]=new P0(port,numOfOnes,m_nSecParam,constSeed); 
-}  
+     cout<<"creating p0 for party "<<(party+1)<<endl;
+     (*P0_s)[party]=new P0(port,numOfOnes,m_nSecParam,constSeed);
+}
