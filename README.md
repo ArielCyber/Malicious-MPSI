@@ -8,7 +8,7 @@
 3) After the installation, you should see that folder named **libOTe** was created.
    Run the command cp -r simple/* libOTe/
    
-4) run the command **make**
+4) run the command **make**. A file named **bin/main** should be created.
 
 
 
