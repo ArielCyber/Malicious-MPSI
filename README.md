@@ -1,4 +1,12 @@
 # Malicious_MPSI
 
 
-download the **install.sh** file and run the command **sudo bash install.sh**
+1) Download the repository
+
+2) Run the command **sudo bash install.sh**
+
+3) After the installation, you should see that folder named **libOTe** was created.
+   Run the command **cp simple/* libOTe**
+
+
+
