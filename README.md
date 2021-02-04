@@ -18,6 +18,7 @@
 
 8) You can change the parameters at the **cfg.txt** file.
 
-9) Run at every computer the command `./bin/main <<a>party number> cfg.txt`.
+9) To activate the protocol-
+   <br> Run at every computer the command `./bin/main <<a>party number> cfg.txt`.
    <br> The number of each party is different and need to be chosen from {0..(parties-1)}
 
