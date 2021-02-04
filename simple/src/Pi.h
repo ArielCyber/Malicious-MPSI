@@ -92,7 +92,7 @@ public:
 
        void compute_R_r();
        unsigned long send_R_r();
-       void recv_R();
+       unsigned long recv_R();
 	
        void get_zeros_ones();	
        void arrange_the_indexes();
