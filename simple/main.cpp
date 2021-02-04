@@ -153,7 +153,7 @@ int main(int argc, char** argv)
           //checking if the received commit is ok, according to the seed which was received
           //and than computing common seed by xoring all the others seeds
           //the common seed is now in the seed object, and we will use it for creating seeds for the hush functions
-          functions::seeds_agreement_p0(P0_s,commit,seed);
+          functions::seeds_agreement_p0(P0_s,commit,seed,&fout_com);
 
           //computing seeds for the hush function
           //taking the common seed which was clculated before
@@ -372,7 +372,7 @@ int main(int argc, char** argv)
           //--step 6-- compute BF
 
 	  std::set<int>* h_kokhav=new std::set<int>[items_size];
-	  pi->create_BF(h_kokhav,hash_seeds, seed);
+	  pi->create_BF_threads(h_kokhav,hash_seeds, seed);
 
           delete [] hash_seeds;
 
