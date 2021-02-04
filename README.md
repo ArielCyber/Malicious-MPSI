@@ -21,5 +21,5 @@
 
 9) To activate the protocol-
    <br> Run at every computer the command `./bin/main <party number> cfg.txt`.
-   <br> The number of each party has to be different and from this range {0..(parties-1)}
+   <br> The number of each party must to be unique and from this range {0..(parties-1)}
 
