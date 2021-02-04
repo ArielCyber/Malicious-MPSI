@@ -1,3 +1,4 @@
 # Malicious_MPSI
 
-run *sudo bash install.sh*
+
+download the **install.sh** file and run the command **sudo bash install.sh**
