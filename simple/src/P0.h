@@ -131,3 +131,5 @@ public:
        static std::set<int>* get_h_kokhav();
 	   
        ~P0();
+
+#endif
