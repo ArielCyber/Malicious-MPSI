@@ -109,7 +109,6 @@ public:
        static unsigned long read_as_a_receiver(receiver* recv,void* msg,unsigned long size);
        static unsigned long read_as_a_sender(sender* snd,void* msg,unsigned long size);
    
-       static void create_BF(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed);
        static void create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed);
 	   
        void get_zeros_ones();	
