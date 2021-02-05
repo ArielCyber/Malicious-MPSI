@@ -3,7 +3,8 @@
 **Running the protocol :**
 
 1) Clone the repository `git clone https://github.com/ArielCyber/Malicious_MPSI.git`
-
+   <br>Go to the **Malicious_MPSI** directory, by using the command `cd Malicious_MPSI`
+   
 2) Run the command `sudo bash install.sh`
 
 3) After the installation, a folder named **libOTe** should have been created.
@@ -21,5 +22,5 @@
 8) You can change the parameters in the **cfg.txt** file.
 
 9) To activate the protocol-
-   <br> Run at every computer the command `./bin/main <party number> cfg.txt`.
+   <br> Run at every computer the command `./bin/main <party number> cfg.txt`
 
