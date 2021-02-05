@@ -38,7 +38,7 @@ Nc_sender(Nc),items(items),Not(Not),Nbf(Nbf),k(k),maxOnes(maxOnes),seeds_num(see
 
 
 void Pi::get_zeros_ones(){
-     functions::get_zeros_ones(b, Not,arr_indexes,crypt);
+     functions::get_zeros_ones(b, Not, Nc_recv, arr_indexes,crypt);
 }
 
 crypto* Pi::getCrypto(){
