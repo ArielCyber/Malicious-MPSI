@@ -365,7 +365,7 @@ namespace functions{
     block* get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y, synchGBF* test);
     void comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout);
 
-    void get_zeros_ones(BitVector* b, int Not, vector<int>*& arr_indexes,crypto *crypt);
+    void get_zeros_ones(BitVector* b, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt);
 	
     block* compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);  
 	
