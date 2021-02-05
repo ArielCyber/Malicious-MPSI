@@ -52,15 +52,16 @@ void shuffling(vector<int>* arr_indexes,unsigned int* rand){
  * 
  * @param bitvector vector of bits
  * @param Not size of the bitvector
+ * @param Nc the sub group size 
  * @param arr_indexes array for the 2 vectors- one for the 0's indexes and one one for the 1's indexes
  * @param crypt crypthographic var 
 */
 
-void functions::get_zeros_ones(BitVector* bitvector, int Not, vector<int>*& arr_indexes,crypto *crypt){
+void functions::get_zeros_ones(BitVector* bitvector, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt){
 
      //establishing 2 vectors of the 0's/1's indexes	
      arr_indexes=new vector<int>[2];
-     for (int i=0;i<Not;i++)
+     for (int i=0;i<(Not-Nc);i++)
          if ((*bitvector)[i]==0) arr_indexes[0].push_back(i);
          else arr_indexes[1].push_back(i);
      delete bitvector;
