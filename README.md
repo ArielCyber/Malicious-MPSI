@@ -1,6 +1,6 @@
 # Malicious_MPSI
 
-**Running the protocol (on Ubuntu 18.04) :**
+**Running the protocol (we used ubuntu 18.04) :**
 
 1) Clone the repository `git clone https://github.com/ArielCyber/Malicious_MPSI.git`
    <br>Go to the **Malicious_MPSI** directory, by using the command `cd Malicious_MPSI`
