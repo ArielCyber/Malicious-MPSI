@@ -188,7 +188,7 @@ void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr
 
     (*indexes)=indexes1;	
 
-    cout<<"arrange_the_indexes complete!"<<endl;
+    //cout<<"arrange_the_indexes complete!"<<endl;
 }
 
 
@@ -284,7 +284,7 @@ void functions::bf_thread(int seeds_num, std::set<int>* h_kokhav,Bitstring* BF,d
  */
 
 void functions::create_BF_threads(std::set<int>* h_kokhav,std::vector <int>* items, int len, Bitstring* BF, int Nbf,int seeds_num, unsigned int* seeds, block seed){
-    auto start = std::chrono::steady_clock::now();
+    //auto start = std::chrono::steady_clock::now();
 
     //creating AES object
     details::AES<details::AESTypes::NI>* aes=new details::AES<details::AESTypes::NI>();
@@ -293,8 +293,8 @@ void functions::create_BF_threads(std::set<int>* h_kokhav,std::vector <int>* ite
     //calculating number of half seeds
     int encNum=seeds_num/2+(seeds_num%2);
 
-    auto med = std::chrono::steady_clock::now();
-    std::cout<<"BF consruction setup time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
+    //auto med = std::chrono::steady_clock::now();
+    //std::cout<<"BF consruction setup time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
 
     //separating the items to 36 blocks, and sending each block to a thread which will create the BF
     int begin=0;
@@ -314,8 +314,8 @@ void functions::create_BF_threads(std::set<int>* h_kokhav,std::vector <int>* ite
 
     delete aes;
 
-    auto end = std::chrono::steady_clock::now();
-    std::cout<<"BF construction online time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<std::endl;
+    //auto end = std::chrono::steady_clock::now();
+    //std::cout<<"BF construction online time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<std::endl;
 
 }
 
@@ -355,7 +355,7 @@ void functions::get_sub_group(int sub_group[],int big_group_size,int small_group
 
         //we need now to get numbers which are smaller than big_group_size(Not)
 	//Accordingly, we will activate modulo Not on each number we got from the AES function
-        std::cout<<"getting random vals"<<std::endl; 
+        //std::cout<<"getting random vals"<<std::endl; 
 		 
         std::set<unsigned int>* s=new set<unsigned int>();
 
@@ -369,7 +369,7 @@ void functions::get_sub_group(int sub_group[],int big_group_size,int small_group
                    if (j==size) std::cout<<"out of randoms"<<std::endl;      
         }                                                                                                                                                                                                                                                                                                                                                                                 delete [] ciphertexts;
        	 
-        std::cout<<"setting the vals to the sub group"<<std::endl;   
+        //std::cout<<"setting the vals to the sub group"<<std::endl;   
         i=0;
 	for (auto item:(*s)){
 		   sub_group[i++]=item;    
@@ -457,8 +457,8 @@ void functions::compute_R_r(  int* sub_group,int* indexes,BitVector* b,int Ncc,i
 	  r=r^strings[sub_group[i]];
         }
     }
-    cout<<"Size of R = "<<R.size()<<endl;
-    cout <<"Ncc - R ="<<Ncc-R.size()<<endl;
+    //cout<<"Size of R = "<<R.size()<<endl;
+    //cout <<"Ncc - R ="<<Ncc-R.size()<<endl;
 }
 
 
@@ -507,13 +507,13 @@ int functions::if_disjoint_sets(int* cc,int Ncc, int* indexes,int Nbf,int Not){
 **/
 
 block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test){
-    auto start = std::chrono::steady_clock::now();  
+    //auto start = std::chrono::steady_clock::now();  
 
     //creating Y's array
     Y=new block[items.size()];
 
-    auto med = std::chrono::steady_clock::now();    
-    std::cout<<"Get_Y time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;         
+    //auto med = std::chrono::steady_clock::now();    
+    //std::cout<<"Get_Y time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;         
 
     //setting 0's to Y's array
     for (int i=0;i<(int)items.size();i++)
@@ -526,7 +526,7 @@ block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , i
     block block0=toBlock(0,0);
 
     //going over all the items in the DB and filling the GBF
-    std::cout<<"rerandomizing"<<std::endl; 
+    //std::cout<<"rerandomizing"<<std::endl; 
     for (int i=0;i<n;i++){
         int finalInd=-1;
         block finalShare=Y[i];
@@ -565,8 +565,8 @@ block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , i
         }
     }
 
-    auto med2 = std::chrono::steady_clock::now();
-    std::cout<<"GBF data construction time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med2-med).count()<<std::endl;
+    //auto med2 = std::chrono::steady_clock::now();
+    //std::cout<<"GBF data construction time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med2-med).count()<<std::endl;
 
     //filling the cells which remain empty
     for (int i=0; i<Nbf;i++)
@@ -580,8 +580,8 @@ block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , i
            delete x2;
        }
 
-    auto end=std::chrono::steady_clock::now();
-    std::cout<<"GBF putting random strings time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;
+    //auto end=std::chrono::steady_clock::now();
+    //std::cout<<"GBF putting random strings time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;
 
     delete [] Y;
     return GBF;
@@ -601,14 +601,14 @@ block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , i
 **/
 
 block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test){
-    auto start = std::chrono::steady_clock::now();
+    //auto start = std::chrono::steady_clock::now();
     
     //setting the Y's array
-    std::cout<<"geting_Y"<<std::endl;
+    //std::cout<<"geting_Y"<<std::endl;
     Y=get_Y(n, pi , h_kokhav, Y, test);
 
-    auto med = std::chrono::steady_clock::now();
-    std::cout<<"Get_Y time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
+    //auto med = std::chrono::steady_clock::now();
+    //std::cout<<"Get_Y time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
     
     //setting 0's to GBF's array
     for (int i=0;i<Nbf;i++) 
@@ -617,7 +617,7 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
     block block0=toBlock(0,0);
 	
     //going over all the items in the DB and filling the GBF
-    std::cout<<"rerandomizing"<<std::endl;
+    //std::cout<<"rerandomizing"<<std::endl;
     for (int i=0;i<n;i++){
 		
         int finalInd=-1;
@@ -661,8 +661,8 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
         } 
     }
 
-    auto med2 = std::chrono::steady_clock::now();
-    std::cout<<"GBF data construction time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med2-med).count()<<std::endl;
+    //auto med2 = std::chrono::steady_clock::now();
+    //std::cout<<"GBF data construction time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med2-med).count()<<std::endl;
     
 	
     //filling the cells which remain empty
@@ -676,8 +676,8 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
 	    delete x1;
 	    delete x2;
 	}
-    auto end = std::chrono::steady_clock::now();
-    std::cout<<"GBF putting random strings time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;
+    //auto end = std::chrono::steady_clock::now();
+    //std::cout<<"GBF putting random strings time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;
 	
     delete [] Y;
     return GBF;
@@ -718,7 +718,7 @@ block* functions::check_the_item(set<int>& h_kokhav,int bytes, int Nbf,block* GB
 
 void functions::offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player,fstream* fout,std::mutex* mu){
 
-   std::cout<<"starting offline apport receiver"<<std::endl;	
+   //std::cout<<"starting offline apport receiver"<<std::endl;	
    
    string str=(*ips)[other_player];
    str.append(":");
@@ -766,10 +766,10 @@ void functions::offline_apport_receiver(Party* party,std::vector<std::string>* i
 
 void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu){
 
-    std::cout<<"starting offline apport sender"<<std::endl;
+    //std::cout<<"starting offline apport sender"<<std::endl;
 	
     string str1=(*ips)[player];
-    cout<<str1;
+    //cout<<str1;
     str1.append(":");
     if (player==0)
 	str1.append( std::to_string(7000+other_player*2+1));
@@ -918,10 +918,10 @@ void functions::set_ips(std::vector <string>& ips,string file, int* parties){
     }
 
     *parties=ips.size();
-    cout<<"parties:"<<*parties<<endl;
-    for (int i=0;i<*parties;i++){
+    //cout<<"parties:"<<*parties<<endl;
+    /*for (int i=0;i<*parties;i++){
 	cout<<ips[i]<<endl;
-    }	
+    }*/	
 }
 
 
@@ -1037,7 +1037,7 @@ void functions::seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed
 	seed=seed^seeds_recv[p];
     }
 			
-    cout<<"common seed:"<<seed<<endl;
+    //cout<<"common seed:"<<seed<<endl;
 			
     delete [] commits_recv;
     delete [] seeds_recv;
@@ -1112,7 +1112,7 @@ void functions::seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& 
 	seed=seed^seeds_recv[i];
     }
 			
-    cout<<"common seed:"<<seed<<endl;
+    //cout<<"common seed:"<<seed<<endl;
 			
     delete [] commits_recv;
     delete [] seeds_recv;
@@ -1215,7 +1215,7 @@ void functions::secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int play
 //helper function
 void functions::secret_write(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu){
     unsigned long sum1=pi->write_to_player(other_player,keys,sizeof(block));
-    cout<<"write to "<<other_player<<" "<<*keys<<" "<<"bytes:"<<sum1<<" "<<endl;
+    //cout<<"write to "<<other_player<<" "<<*keys<<" "<<"bytes:"<<sum1<<" "<<endl;
     mu->lock();  
     (*sum)=(*sum)+sum1; 
     mu->unlock();   
@@ -1224,7 +1224,7 @@ void functions::secret_write(Pi* pi,int other_player,block* keys,unsigned long* 
 //helper function
 void functions::secret_read(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu){
     unsigned long sum1=pi->read_from_player(other_player,keys,sizeof(block));
-    cout<<"read from "<<other_player<<" "<<*keys<<" "<<"bytes:"<<sum1<<" "<<endl;
+    //cout<<"read from "<<other_player<<" "<<*keys<<" "<<"bytes:"<<sum1<<" "<<endl;
     mu->lock();  
     (*sum)=(*sum)+sum1;  
     mu->unlock();    
@@ -1279,7 +1279,7 @@ void functions::secret_sharing_seed_p0(vector <P0*>& p0_s,int parties,block* key
 //helper function to send the key
 void functions::secret_write_p0(P0* p0,block* keys,unsigned long* sum,std::mutex* mu){
     unsigned long sum1=p0->write_as_a_sender(keys,sizeof(block));
-    cout<<"sending block:"<<(*keys)<<" "<<"bytes:"<<sum1<<" "<<endl;
+    //cout<<"sending block:"<<(*keys)<<" "<<"bytes:"<<sum1<<" "<<endl;
     mu->lock();
     (*sum)=(*sum)+sum1;
     mu->unlock();
@@ -1288,7 +1288,7 @@ void functions::secret_write_p0(P0* p0,block* keys,unsigned long* sum,std::mutex
 //helper function to receive the key
 void functions::secret_read_p0(P0* p0,block* keys,unsigned long* sum,std::mutex* mu){
     unsigned long sum1=p0->read_as_a_sender(keys,sizeof(block));
-    cout<<"receiving block:"<<(*keys)<<" "<<"bytes:"<<sum1<<" "<<endl;
+    //cout<<"receiving block:"<<(*keys)<<" "<<"bytes:"<<sum1<<" "<<endl;
     mu->lock(); 
     (*sum)=(*sum)+sum1;
     mu->unlock();
@@ -1308,7 +1308,7 @@ void functions::secret_read_p0(P0* p0,block* keys,unsigned long* sum,std::mutex*
 **/
   
 void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv){		
-     auto start = std::chrono::steady_clock::now();
+     //auto start = std::chrono::steady_clock::now();
      block* r=test->getGBF();
 	
      //creating objects for activate aes
@@ -1323,8 +1323,8 @@ void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block
 	 r[i]=toBlock(0,0);
      }
 
-    auto med = std::chrono::steady_clock::now();
-    std::cout<<"Secret-sharing setup time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
+    //auto med = std::chrono::steady_clock::now();
+    //std::cout<<"Secret-sharing setup time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(med-start).count()<<std::endl;
 	
     //activating AES and xoring the secrets
     for (int p=0;p<(parties-1);p++) {
@@ -1336,8 +1336,8 @@ void functions::secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block
 	    for (unsigned int i=0;i<Nbf;i++) r[i]=r[i]^ciphertexts[i];
     }	
 
-    auto end = std::chrono::steady_clock::now();
-    std::cout<<"Secret-sharing time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;	
+    //auto end = std::chrono::steady_clock::now();
+    //std::cout<<"Secret-sharing time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-med).count()<<std::endl;	
 
     //freeing memory
     delete [] keys;
@@ -1481,7 +1481,7 @@ void functions::comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout){
 	    
     (*fout)<<"sending gbf to p0,"<<(pi->write_as_a_sender(GBF1,sizeof(block)*Nbf))<<"\n";
     delete [] GBF1;
-    std::cout<<"GBF1 deleted"<<std::endl;
+    //std::cout<<"GBF1 deleted"<<std::endl;
     delete pi;
 }
 		
@@ -1495,6 +1495,6 @@ void functions::comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout){
  * @param numOfOnes numOfOnes to set
 **/
 void functions::creating_p0_instance(int party,int port,std::vector<P0*>* P0_s,uint32_t numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed ){
-     cout<<"creating p0 for party "<<(party+1)<<endl;
+     //cout<<"creating p0 for party "<<(party+1)<<endl;
      (*P0_s)[party]=new P0(port,numOfOnes,m_nSecParam,constSeed);
 }
