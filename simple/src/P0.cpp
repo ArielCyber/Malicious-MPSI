@@ -411,7 +411,7 @@ int P0::check_if_to_abort(){
        return 1;
     }
     else{
-       cout<<"Nc<=Not-Nbf: session continues"<<endl;
+       //cout<<"Nc<=Not-Nbf: session continues"<<endl;
        return 0;
     }
 }
