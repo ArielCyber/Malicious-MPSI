@@ -87,7 +87,7 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
                 //cout<<"Number of OTs"<<numOTs<<endl;
 			BitVector& choice=*(player->getChoices());
 			auto& msgs=player->getStringsReceiver();
-                        try { cout<<choice.size()<<" "<<msgs.size()<<endl; } catch (const std::exception& e) { cout<<"exception"; }
+                        try { /*cout<<choice.size()<<" "<<msgs.size()<<endl;*/ } catch (const std::exception& e) { cout<<"exception"; }
 			// construct the choices that we want.
 			// in this case pick random messages.
 			//choice.randomize(prng);
