@@ -97,7 +97,7 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 			{
                                 // cout<<"OT receive"<<endl;
 				// perform  numOTs random OTs, the results will be written to msgs.
-                                try{ cout<<"choice masg"<<choice.size()<<" "<<msgs.size()<<" "<<chls[i]<<endl;}catch (const std::exception& e) { cout<<"exception"; }      
+                                try{ /*cout<<"choice masg"<<choice.size()<<" "<<msgs.size()<<" "<<chls[i]<<endl;*/}catch (const std::exception& e) { cout<<"exception"; }      
 				receivers[i].receive(choice, msgs, prng, chls[i]);
 			}
 			else
@@ -128,7 +128,7 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 			{
 				//cout<<"OT send1"<<endl;
 				// perform the OTs and write the random OTs to msgs.
-                                        try{ cout<<"msgs"<<msgs.size()<<" "<<chls[i]<<endl;}catch (const std::exception& e) { cout<<"exception"; }
+                                try{/* cout<<"msgs"<<msgs.size()<<" "<<chls[i]<<endl;*/}catch (const std::exception& e) { cout<<"exception"; }
 				senders[i].send(msgs, prng, chls[i]);
 			}
 			else
