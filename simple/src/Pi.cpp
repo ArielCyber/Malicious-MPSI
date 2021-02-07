@@ -1,6 +1,6 @@
 #include "Pi.h"
 
-Pi::Pi(std::vector <int>& items,int  items_size,int Not,int Nbf,int Nc,int k,int maxOnes,int seeds_num,int numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed,int parties,int ** ports, vector<string>& ips,int player):
+Pi::Pi(std::vector <int>* items,int  items_size,int Not,int Nbf,int Nc,int k,int maxOnes,int seeds_num,int numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed,int parties,int ** ports, vector<string>& ips,int player):
 Nc_sender(Nc),items(items),Not(Not),Nbf(Nbf),k(k),maxOnes(maxOnes),seeds_num(seeds_num),items_size(items_size),player(player),parties(parties){
 
 	sub_group_sender=nullptr;
@@ -210,7 +210,7 @@ int Pi::check_if_to_abort2(){
 
 void Pi::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){  
     BF=new Bitstring(Nbf); 
-    functions::create_BF_threads( h_kokhav,&items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);   
+    functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);   
     //cout<<"BF was created"<<endl;  
 }
 
