@@ -15,12 +15,12 @@ P0::P0(int port,int numOfOnes,uint32_t m_nSecParam,uint8_t* constSeed )
      cout<<endl<<"Not: "<<Not<<" Nbf: "<<Nbf<<" Ncc: "<<Nc_sender<<" maxOnes: "<<maxOnes<<endl<<endl;
      strings_choices=new std::vector<block>(Not);
      strings=new std::vector<std::array<block, 2>>(Not);
-     cout<<"strings:"<<strings->size();
+     //cout<<"strings:"<<strings->size();
      init_sender(port);
      crypt = new crypto(m_nSecParam, constSeed);
-     cout<<"creating choices"<<endl;
+     //cout<<"creating choices"<<endl;
      bitvector=new BitVector(Not);
-     cout<<"Num of ones= "<<numOfOnes<<endl;
+     //cout<<"Num of ones= "<<numOfOnes<<endl;
      Bitstring* b1=new Bitstring(Not,numOfOnes,crypt);
      for (int i=0;i<Not;i++)
                 (*bitvector)[i]=b1->get_bit(i);
@@ -78,33 +78,33 @@ void P0::set_maxOnes(int maxOnes){
 
 void P0::set(vector<int>* items,int items_size,int Nbf,int n,int Nc,int string_length,int maxOnes,int seeds_num){
 	
-    cout<<"setting the items"<<endl;
+    //cout<<"setting the items"<<endl;
     set_items(items,items_size);
 	 
-    cout<<"setting Nbf"<<endl;
+    //cout<<"setting Nbf"<<endl;
     set_Nbf(Nbf);
 	 
-    cout<<"setting BF"<<endl;
+    //cout<<"setting BF"<<endl;
     BF=new Bitstring(Nbf);
 	 
-    cout<<"setting Not"<<endl;
+    //cout<<"setting Not"<<endl;
     set_Not(n);
 	 
-    cout<<"setting Nc"<<endl;
+    //cout<<"setting Nc"<<endl;
     set_Nc_sender(Nc);
 	 
-    cout<<"setting k"<<endl;
+    //cout<<"setting k"<<endl;
     set_string_length(string_length);
 	 
-    cout<<"setting maxOnes"<<endl;
+    //cout<<"setting maxOnes"<<endl;
     set_maxOnes(maxOnes);
 	 
-    cout<<"setting seeds num"<<endl;
+    //cout<<"setting seeds num"<<endl;
     P0::seeds_num=seeds_num;	
 }
 
 void P0::delete_bf(){
-	if (BF!=nullptr) delete BF;
+     if (BF!=nullptr) delete BF;
 }
 
 void P0::init_sender( int port){
@@ -171,26 +171,26 @@ void P0::set_sub_group(){
     //getting sub group
     sub_group_sender=new int[Nc_sender];
     functions::get_sub_group(sub_group_sender,Not,Nc_sender,seed_sub_group);
-    cout<<"sub group was set"<<endl;
+    //cout<<"sub group was set"<<endl;
 }
 
 unsigned long P0::send_sub_group(){
 
     unsigned long sum=write_as_a_sender( &Nc_sender,sizeof(int));		   
     sum+=write_as_a_sender( &seed_sub_group,sizeof(block));
-    cout<<"sub group was sent"<<endl;
+    //cout<<"sub group was sent"<<endl;
     return sum;
 }
 
 unsigned long P0::recv_R(){
     unsigned long sum=read_as_a_sender(&Nr_sender,sizeof(int));
-    cout<<"From P0: Nr: "<<Nr_sender<<endl<<endl;
+    //cout<<"From P0: Nr: "<<Nr_sender<<endl<<endl;
     R_sender=new int[Nr_sender];
     sum+=read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
     sum+=read_as_a_sender(&r_sender,sizeof(block));
-    cout<<"From P0: r* (P0): "<<r_sender;
-    cout<<endl;
-    cout<<"R and r were received"<<endl;
+    //cout<<"From P0: r* (P0): "<<r_sender;
+    //cout<<endl;
+    //cout<<"R and r were received"<<endl;
     return sum;
 }
 
@@ -209,10 +209,10 @@ int P0::check_if_to_abort1(){
 	int flag=0;
 	block r1;
 	functions::compute_r(r1,*strings, R_sender,Nr_sender);
-	cout<<endl<<"r*(Alice) :"<<r1;
+	//cout<<endl<<"r*(Alice) :"<<r1;
         if (neq(r1,r_sender))
         flag=1;
-	cout<<endl<<endl;
+	//cout<<endl<<endl;
 
 	if (flag==1){
 	     cout<<"r* is not OK: session has been stopped"<<endl;
@@ -237,7 +237,7 @@ int P0::check_if_to_abort1(){
 unsigned long P0::recv_func(){
      func_sender=new int[Nbf];
      unsigned long sum=read_as_a_sender(func_sender,sizeof(int)*Nbf);
-     cout<<"func was received"<<endl;
+     //cout<<"func was received"<<endl;
      return sum;
 }
 
@@ -254,7 +254,7 @@ int P0::check_if_to_abort2(){
     }
     else{
 	if (sub_group_sender!=nullptr) delete [] sub_group_sender;
-	cout<<"the function and the sub group are disjoint: session continues"<<endl;
+	//cout<<"the function and the sub group are disjoint: session continues"<<endl;
 	i=0;
 	write_as_a_sender(&i,sizeof(int));		
         return 0;	
@@ -263,12 +263,12 @@ int P0::check_if_to_abort2(){
 
 void P0::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){
     functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds,seed);
-    cout<<"BF was created"<<endl;     
+    //cout<<"BF was created"<<endl;     
 }
 	
 void P0::create_RBF_sender(synchGBF* test){
     test->XORorderedBF(strings, func_sender,BF);
-    cout<<"RBF was created"<<endl;
+    //cout<<"RBF was created"<<endl;
 	if (func_sender!=nullptr) delete [] func_sender;  
     if (strings!=nullptr) delete strings;
 }		
@@ -281,7 +281,7 @@ unsigned long P0::write_as_a_sender(void* msg,unsigned long size){
            n=write(s.connect_sock, &((char*)msg)[size-left],left);
            left-=n;
            sum+=n;
-           cout<<left;
+           //cout<<left;
     }
     return sum;
 }
@@ -293,7 +293,7 @@ unsigned long P0::write_as_a_sender(sender* snd,void* msg,unsigned long size){
     while (left){
            n=write(snd->connect_sock, &((char*)msg)[size-left],left);
            left-=n;
-	   cout<<left;
+	   //cout<<left;
            sum+=n;
     }
     return sum;
@@ -424,10 +424,10 @@ void P0::compute_R_r(){
     functions::compute_R_r(sub_group_recv,func_recv,bitvector,Nc_recv,Not,*strings_choices,r_recv,*R_recv);  
     if (sub_group_recv!=nullptr) delete [] sub_group_recv;
     Nr_recv=(*R_recv).size();
-    cout<<"Nr: "<<Nr_recv<<endl<<endl;
-    cout<<"r* (P0): "<<r_recv;
-    cout<<endl<<endl;
-    cout<<"r and R were computed"<<endl;
+    //cout<<"Nr: "<<Nr_recv<<endl<<endl;
+    //cout<<"r* (P0): "<<r_recv;
+    //cout<<endl<<endl;
+    //cout<<"r and R were computed"<<endl;
 }
 
 unsigned long P0::send_R_r(){
@@ -438,25 +438,25 @@ unsigned long P0::send_R_r(){
     if (R_recv!=nullptr) delete R_recv;
     sum+=write_as_a_receiver(arr,sizeof(int)*Nr_recv);
     sum+=write_as_a_receiver(&r_recv,sizeof(block));
-    cout<<"r and R were sent"<<endl;
+    //cout<<"r and R were sent"<<endl;
     return sum;
 }
 
 void P0::arrange_the_indexes(){
    functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt); 
-   cout<<"indexes were arranged"<<endl;   
+   //cout<<"indexes were arranged"<<endl;   
 }
 
 void P0::create_RBF_receiver(synchGBF* test){
    test->XORordered(strings_choices,func_recv);
-   cout<<"rbf was created"<<endl;
+   //cout<<"rbf was created"<<endl;
    if (func_recv!=nullptr) delete [] func_recv;
    if (strings_choices!=nullptr) delete strings_choices;
 }
 
 unsigned long P0::send_func(){
    unsigned long sum=write_as_a_receiver(func_recv,sizeof(int)*Nbf);
-   cout<<"func was sent"<<endl;
+   //cout<<"func was sent"<<endl;
    return sum;	
 }	
 
@@ -478,7 +478,7 @@ std::vector<block>& P0::getStringsReceiver(){
 }
 
 std::vector<std::array<block, 2>>& P0::getStrings(){
-    cout<<"strings:"<<strings->size();
+    //cout<<"strings:"<<strings->size();
     return *strings;
 }
 
