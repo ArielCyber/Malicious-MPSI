@@ -104,11 +104,11 @@ class synchGBF{
 
     synchGBF(int Nbf,int chunks,int segments):GBF_length(Nbf),segments(segments){//256
         chunk_size=ceil(Nbf/segments);
-        std::cout<<"Chunk size ="<<chunk_size<<endl;
+        //std::cout<<"Chunk size ="<<chunk_size<<endl;
         GBF=new block[GBF_length];
-        std::cout<<"GBF_length= "<<GBF_length<<std::endl;
+        //std::cout<<"GBF_length= "<<GBF_length<<std::endl;
         num_of_chunks=segments;
-        std::cout<<"num_of_chunks= "<<num_of_chunks<<std::endl;
+        //std::cout<<"num_of_chunks= "<<num_of_chunks<<std::endl;
         mtxArr_length= num_of_chunks;
         last_chunk=num_of_chunks-1;
         lastChunkStart=(num_of_chunks-1)*chunk_size;
@@ -120,11 +120,11 @@ class synchGBF{
     }
 
     synchGBF(int Nbf,int chunks):GBF_length(Nbf),chunk_size(chunks){//256
-        std::cout<<"Chunk size ="<<chunk_size<<endl;
+        //std::cout<<"Chunk size ="<<chunk_size<<endl;
         GBF=new block[GBF_length];
-        std::cout<<"GBF_length= "<<GBF_length<<std::endl;
+        //std::cout<<"GBF_length= "<<GBF_length<<std::endl;
         num_of_chunks=GBF_length/chunk_size+1;
-        std::cout<<"num_of_chunks= "<<num_of_chunks<<std::endl;
+        //std::cout<<"num_of_chunks= "<<num_of_chunks<<std::endl;
         mtxArr_length= num_of_chunks;
         last_chunk=num_of_chunks-1;
         lastChunkStart=(num_of_chunks-1)*chunk_size;
