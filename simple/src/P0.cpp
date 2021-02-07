@@ -12,7 +12,7 @@ P0::P0(int port,int numOfOnes,uint32_t m_nSecParam,uint8_t* constSeed )
      func_recv=nullptr;
      RBF_recv=nullptr;
      RBF_sender=nullptr;
-     cout<<endl<<"Not: "<<Not<<" Nbf: "<<Nbf<<" Ncc: "<<Nc_sender<<" maxOnes: "<<maxOnes<<endl<<endl;
+     //cout<<endl<<"Not: "<<Not<<" Nbf: "<<Nbf<<" Ncc: "<<Nc_sender<<" maxOnes: "<<maxOnes<<endl<<endl;
      strings_choices=new std::vector<block>(Not);
      strings=new std::vector<std::array<block, 2>>(Not);
      //cout<<"strings:"<<strings->size();
@@ -26,7 +26,7 @@ P0::P0(int port,int numOfOnes,uint32_t m_nSecParam,uint8_t* constSeed )
                 (*bitvector)[i]=b1->get_bit(i);
      delete b1;
 
-     std::cout<<"end c'tor"<<std::endl;
+     //std::cout<<"end c'tor"<<std::endl;
 }
 crypto* P0::getCrypto(){
    return crypt;
@@ -224,7 +224,7 @@ int P0::check_if_to_abort1(){
              return 1;
         }
         else{
-	     cout<<"Ncc-Nr<=Nmaxones && r*(Alice)==r*(Alice): session continues"<<endl;
+	     //cout<<"Ncc-Nr<=Nmaxones && r*(Alice)==r*(Alice): session continues"<<endl;
 	     if (R_sender!=nullptr) delete [] R_sender;
 	     return 0;
         }
