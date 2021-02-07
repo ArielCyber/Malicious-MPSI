@@ -112,27 +112,27 @@ void Pi::set_sub_group(){
     //getting sub group
     sub_group_sender=new int[Nc_sender];
     functions::get_sub_group(sub_group_sender,Not,Nc_sender,seed_sub_group);
-    cout<<"sub group was set"<<endl;
+    //cout<<"sub group was set"<<endl;
 }
 
 unsigned long Pi::send_sub_group(){
     unsigned long sum=write_as_a_sender( &Nc_sender,sizeof(int));		   
     sum+=write_as_a_sender( &seed_sub_group,sizeof(block));
-    cout<<"sub group was sent"<<endl;
+    //cout<<"sub group was sent"<<endl;
     return sum;
 }
 
 
 unsigned long Pi::recv_R(){
      unsigned long sum=read_as_a_sender(&Nr_sender,sizeof(int));
-     cout<<"From Alice: Nr: "<<Nr_sender<<endl<<endl;
+     //cout<<"From Alice: Nr: "<<Nr_sender<<endl<<endl;
      R_sender=new int[Nr_sender];
      sum+=read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
      sum+=read_as_a_sender(&r_sender,sizeof(block));
-     cout<<"From Alice: r* (Alice): ";
-     cout<<r_sender;
-     cout<<endl;
-     cout<<"R and r were received"<<endl;
+     //cout<<"From Alice: r* (Alice): ";
+     //cout<<r_sender;
+     //cout<<endl;
+     //cout<<"R and r were received"<<endl;
      return sum;
 }
 
@@ -154,7 +154,7 @@ int Pi::check_if_to_abort1(){
 	int flag=0;
 	block r1;
 	functions::compute_r(r1,*strings, R_sender,Nr_sender);
-	cout<<endl<<"r*(Alice) :"<<r1;
+	//cout<<endl<<"r*(Alice) :"<<r1;
         if (neq(r1,r_sender))
 		    flag=1;
 	cout<<endl<<endl;
@@ -170,7 +170,7 @@ int Pi::check_if_to_abort1(){
              return 1;
         }
         else{
-	     cout<<"Ncc-Nr<=Nmaxones && r*(Alice)==r*(Alice): session continues"<<endl;
+	     //cout<<"Ncc-Nr<=Nmaxones && r*(Alice)==r*(Alice): session continues"<<endl;
 	     if (R_sender!=nullptr) delete [] R_sender;
 	     return 0;
         }
@@ -182,7 +182,7 @@ int Pi::check_if_to_abort1(){
 unsigned long Pi::recv_func(){
      func_sender=new int[Nbf];
      unsigned long sum=read_as_a_sender(func_sender,sizeof(int)*Nbf);
-     cout<<"func was received"<<endl;
+     //cout<<"func was received"<<endl;
      return sum;
 }
 
@@ -200,7 +200,7 @@ int Pi::check_if_to_abort2(){
     }
     else{
 	if (sub_group_sender!=nullptr) delete [] sub_group_sender;
-	cout<<"the function and the sub group are disjoint: session continues"<<endl;
+	//cout<<"the function and the sub group are disjoint: session continues"<<endl;
 	i=0;
 	write_as_a_sender(&i,sizeof(int));		
         return 0;	
@@ -211,14 +211,14 @@ int Pi::check_if_to_abort2(){
 void Pi::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){  
     BF=new Bitstring(Nbf); 
     functions::create_BF_threads( h_kokhav,&items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);   
-    cout<<"BF was created"<<endl;  
+    //cout<<"BF was created"<<endl;  
 }
 
 
 void Pi::create_RBF_sender(synchGBF* test){ 
     test->XORorderedBF(strings, func_sender,BF);
-    cout<<"RBF was created"<<endl;
-	if (func_sender!=nullptr) delete [] func_sender;  
+    //cout<<"RBF was created"<<endl;
+    if (func_sender!=nullptr) delete [] func_sender;  
     if (strings!=nullptr) delete strings;
 }	
 
@@ -340,7 +340,7 @@ unsigned long Pi::read_from_player(int other_player,void* msg,unsigned long size
 
 unsigned long Pi::recv_C(){
     unsigned long sum=read_as_a_receiver(&Nc_recv,sizeof(int));
-    cout<<"From P0: Nc: "<<Nc_recv<<endl<<endl;
+    //cout<<"From P0: Nc: "<<Nc_recv<<endl<<endl;
     sub_group_recv=new int[Nc_recv];
     block seed_recv;
     sum+=read_as_a_receiver( &seed_recv, sizeof(block));
@@ -357,7 +357,7 @@ int Pi::check_if_to_abort(){
        return 1;
     }
     else{
-       cout<<"Nc<=Not-Nbf: session continues"<<endl;
+       //cout<<"Nc<=Not-Nbf: session continues"<<endl;
        return 0;
     }
 }
@@ -369,10 +369,10 @@ void Pi::compute_R_r(){
     functions::compute_R_r(sub_group_recv,func_recv,b,Nc_recv,Not,*strings_choices,r_recv,*R_recv);
     if (sub_group_recv!=nullptr) delete [] sub_group_recv;
     Nr_recv=(*R_recv).size();
-    cout<<"Nr: "<<Nr_recv<<endl<<endl;
-    cout<<"computed r*: "<<r_recv;
-    cout<<endl<<endl;
-    cout<<"r and R were computed"<<endl;
+    //cout<<"Nr: "<<Nr_recv<<endl<<endl;
+    //cout<<"computed r*: "<<r_recv;
+    //cout<<endl<<endl;
+    //cout<<"r and R were computed"<<endl;
 
 }
 
@@ -384,14 +384,14 @@ unsigned long Pi::send_R_r(){
     if (R_recv!=nullptr) delete R_recv;
     sum+=write_as_a_receiver(arr,sizeof(int)*Nr_recv);
     sum+=write_as_a_receiver(&r_recv,sizeof(block));
-    cout<<"r and R were sent"<<endl;
+    //cout<<"r and R were sent"<<endl;
     return sum;
 }
 
 
 void Pi::arrange_the_indexes(){
    functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt);
-   cout<<"indexes were arranged"<<endl;   
+   //cout<<"indexes were arranged"<<endl;   
 }
 
 
@@ -399,16 +399,16 @@ void Pi::create_RBF_receiver(synchGBF* test){
 
    test->XORordered(strings_choices,func_recv);
 
-   cout<<"rbf was created"<<endl;
+   //cout<<"rbf was created"<<endl;
    if (func_recv!=nullptr) delete [] func_recv;
    if (strings_choices!=nullptr) delete strings_choices;
-   cout<<"rbf was created"<<endl;
+   //cout<<"rbf was created"<<endl;
 }
 
 
 unsigned long Pi::send_func(){
     unsigned long sum=write_as_a_receiver(func_recv,sizeof(int)*Nbf);
-    cout<<"func was sent"<<endl;
+    //cout<<"func was sent"<<endl;
     return sum;	
 }
 
@@ -431,11 +431,11 @@ Pi::~Pi(){
    delete [] senders;
    delete [] receivers;
 
-   std::cout<<"deleting BF"<<std::endl;	
+   //std::cout<<"deleting BF"<<std::endl;	
    if (BF!=nullptr) delete BF;
-   std::cout<<"deleting RBF_recv"<<std::endl;
+   //std::cout<<"deleting RBF_recv"<<std::endl;
    if (RBF_recv!=nullptr) delete [] RBF_recv;
-   std::cout<<"deleting RBF_sender"<<std::endl;	 
+   //std::cout<<"deleting RBF_sender"<<std::endl;	 
    if (RBF_sender!=nullptr) delete [] RBF_sender;
 
 }
