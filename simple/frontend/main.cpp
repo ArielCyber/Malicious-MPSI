@@ -186,7 +186,7 @@ int main(int argc, char** argv)
 
           if(parties>2)
           {
-             cout<<"Secret-sharing executed"<<endl;
+             //cout<<"Secret-sharing executed"<<endl;
              threads.push_back(new thread(functions::secret_sharing_aes,parties,Nbf,test,keys,keys_recv));
           }
 
