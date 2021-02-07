@@ -335,10 +335,10 @@ void functions::get_sub_group(int sub_group[],int big_group_size,int small_group
         //getting random vals using our seed as key, and numbers from 0 to small_group_size(Nc)/2 as messages and activating on it the AES function
         //we use numbers from 0 to small_group_size/2, because each block object which we are getting from the AES function includes 2 numbers of size 64 bit - which is big enougth
 	
-	std::cout<<"creating rands vals"<<std::endl;
+	//std::cout<<"creating rands vals"<<std::endl;
 	int size=(int)((small_group_size/2)*1.1);
 	if ((small_group_size%2)==1) size++;
-	std::cout<<"size: "<<size;
+	//std::cout<<"size: "<<size;
    	block* ciphertexts=new block[size];
 	block* plaintexts=new block[size];
 
@@ -950,7 +950,7 @@ void functions::read_protocol_parameters(const char* cfg_file,uint32_t* seeds,ui
              auto delimiterPos = line.find("=");
              auto name = line.substr(0, delimiterPos);
              values[counter++] = line.substr(delimiterPos + 1);
-             cout << name << ": " << values[counter-1] << '\n';
+             //cout << name << ": " << values[counter-1] << '\n';
         }			
     }
 
