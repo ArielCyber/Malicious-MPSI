@@ -41,7 +41,7 @@ public:
        BitVector* b;
        std::vector<block>* strings_choices;   
        std::vector<int> intersection_recv;
-       std::vector <int>& items; 
+       std::vector <int>* items; 
        Bitstring* BF; 
 	   
        int Not;
@@ -53,7 +53,7 @@ public:
        int player;
        int parties;
 
-       Pi(std::vector <int>& items,int  items_size,int Not,int Nbf,int Nc,int k,int maxOnes,int seeds_num,int numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed ,int parties,int ** ports, vector<string>& ips,int player);
+       Pi(std::vector <int>* items,int  items_size,int Not,int Nbf,int Nc,int k,int maxOnes,int seeds_num,int numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed ,int parties,int ** ports, vector<string>& ips,int player);
       
        crypto* getCrypto(); 
 	
