@@ -126,7 +126,7 @@ void P0::init_sender(struct sender* s, int port){
          perror ("Error naming channel");
      }
       
-     printf("Server is alive and waiting for socket connection from client.\n");
+     //printf("Server is alive and waiting for socket connection from client.\n");
      listen(s->sock, 1); 
 
      s->len = sizeof(s->serv_name);
@@ -140,7 +140,7 @@ void P0::init_receiver(const char* ip,int port){
 
 void P0::init_receiver(struct receiver* recv,const char* ip,int port){ 
 	
-     printf("Client is alive and establishing socket connection.\n");
+     //printf("Client is alive and establishing socket connection.\n");
      recv->sock = socket(AF_INET, SOCK_STREAM, 0);
 	
      if (recv->sock < 0){ 
