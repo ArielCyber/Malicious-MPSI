@@ -299,7 +299,7 @@ int main(int argc, char** argv)
 
           //init Pi                                                                                                                                                                                                                         Pi *pi=new Pi(items,items_size,numOTs,Nbf,Nc,k,maxOnes,seeds_num,numOfOnes,crypt,parties,ports,ips,player);  
           //setting all its attributes
-          Pi *pi=new Pi(items,items_size,numOTs,Nbf,Nc,k,maxOnes,seeds_num,numOfOnes,m_nSecParam, (uint8_t*) m_cConstSeed[player],parties,ports,ips,player);  
+          Pi *pi=new Pi(&items,items_size,numOTs,Nbf,Nc,k,maxOnes,seeds_num,numOfOnes,m_nSecParam, (uint8_t*) m_cConstSeed[player],parties,ports,ips,player);  
 
 	      
 	      
