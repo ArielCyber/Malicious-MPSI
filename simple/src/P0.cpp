@@ -394,7 +394,7 @@ unsigned long P0::read_as_a_receiver(receiver* recv,void* msg,unsigned long size
 
 unsigned long P0::recv_C(){
     unsigned long sum=read_as_a_receiver(&Nc_recv,sizeof(int));
-    cout<<"From P0: Nc: "<<Nc_recv<<endl<<endl;
+    //cout<<"From P0: Nc: "<<Nc_recv<<endl<<endl;
     sub_group_recv=new int[Nc_recv];
     block seed_recv;
     sum+=read_as_a_receiver( &seed_recv, sizeof(block));
