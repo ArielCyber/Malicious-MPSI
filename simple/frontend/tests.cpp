@@ -110,7 +110,6 @@ TEST(arrangeTheIndexes, test1)
 	set <int> ones;
 	
 	for (int i=0;i<Nbf;i++){
-		cout<<indexes[i]<<" ";
 		if ((BF.get_bit(i)==0) && (set_0.find(indexes[i])!=set_0.end())) zeros.insert(indexes[i]);
 		else if((BF.get_bit(i)==1) && (set_1.find(indexes[i])!=set_1.end())) ones.insert(indexes[i]);
 	}
