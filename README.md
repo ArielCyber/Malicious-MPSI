@@ -26,4 +26,4 @@
 10) To activate the protocol-
    <br> Run at every computer the command `./bin/main <party number> cfg.txt`
 
-  (for running tests- `./bin/tests`)
+   <br> For running tests- `./bin/tests`
