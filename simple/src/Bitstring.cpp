@@ -50,6 +50,11 @@ Bitstring::Bitstring(int length, int numOfOnes,crypto* c):length(length){
 
 }
 
+Bitstring(int length, int* arr){
+	this->arr=new BYTE[length];
+	for(int i=0;i<length;i++) this->arr[i]=arr[i];
+}
+
 /**
  * replacing the bit at the requested place 
  *
