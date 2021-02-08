@@ -1370,7 +1370,7 @@ std::chrono::steady_clock::time_point functions::get_duration(std::chrono::stead
  * @pararm test shared GBF
 **/
 
-void functions::get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player) {
+void functions::get_gbf(P0* p0, synchGBF* test,unsigned long* data,int player) {
 
     int chunk_size=test->getChunkSize();
     block* chunkArr=new block[chunk_size];
@@ -1401,7 +1401,7 @@ void functions::get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player) 
  
 **/
 
-block* functions::compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout){
+block* functions::compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout){
 	
    //getting GBF from the other parties and xoring them
    vector <thread*> threads;
