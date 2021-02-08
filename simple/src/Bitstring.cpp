@@ -1,7 +1,6 @@
 #include "Bitstring.h"
 
 Bitstring::Bitstring(int length, int numOfOnes,crypto* c):length(length){
-    bytes=(int)(ceil((double)length/8));
 	
     //std::cout<<"creating arr"<<bytes<<std::endl;
     arr=new BYTE[length];
