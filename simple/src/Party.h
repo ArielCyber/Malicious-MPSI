@@ -106,7 +106,7 @@ public:
        //deleting BF
        static void delete_bf();
 
-       //aborting's terms
+       //security check
        int check_if_to_abort();   
        int check_if_to_abort1();
        int check_if_to_abort2(); 
