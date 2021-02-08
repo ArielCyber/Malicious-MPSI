@@ -1408,7 +1408,7 @@ block* functions::compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fst
    unsigned long* data=new unsigned long[P0_s.size()];  
    
    for (int i=0;i<(int)P0_s.size();i++){
-        threads.push_back(new thread(functions::get_gbf1,P0_s[i],test,data,i));	
+        threads.push_back(new thread(functions::get_gbf,P0_s[i],test,data,i));	
    }
    for (auto& t:threads) t->join();
    for (auto& t:threads) delete t;
