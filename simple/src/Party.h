@@ -72,7 +72,7 @@ public:
        unsigned long write_as_a_sender(void* msg,unsigned long size);
        unsigned long read_as_a_sender(void* msg,unsigned long size);  
 
-       //writing/reading to/from socket
+       //writing/reading to/from a socket
        static unsigned long write_as_a_sender(sender* snd,void* msg,unsigned long size);
        static unsigned long write_as_a_receiver(receiver* recv,void* msg,unsigned long size);
        static unsigned long read_as_a_receiver(receiver* recv,void* msg,unsigned long size);
