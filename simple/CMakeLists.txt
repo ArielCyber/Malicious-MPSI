@@ -218,3 +218,6 @@ add_subdirectory(libOTe_Tests)
 #############################################
 add_subdirectory(frontend)
 
+enable_testing()
+
+add_subdirectory(googletest)
