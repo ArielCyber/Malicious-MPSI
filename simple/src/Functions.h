@@ -28,6 +28,8 @@
 #include <cryptoTools/Common/block.h>
 #include <cryptoTools/Crypto/AES.h>
 #include <cryptoTools/Crypto/Commit.h>
+
+
 class semaphore
 {
 private:
@@ -49,13 +51,6 @@ public:
         --count_;
     }
 };
-
-
-
-
-
-
-
 
 
 class Gbf_seg;
