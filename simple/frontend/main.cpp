@@ -299,8 +299,8 @@ int main(int argc, char** argv)
 
           //init Pi                                                                                                                                                                                                                         Pi *pi=new Pi(items,items_size,numOTs,Nbf,Nc,k,maxOnes,seeds_num,numOfOnes,crypt,parties,ports,ips,player);  
           //setting all its attributes
-          Pi *pi=new Pi(&items,items_size,numOTs,Nbf,Nc,k,maxOnes,seeds_num,numOfOnes,m_nSecParam, (uint8_t*) m_cConstSeed[player],parties,ports,ips,player);  
-
+	  Pi::set(&items,items_size,Nbf,numOTs,Nc,bytes,maxOnes,seeds_num);
+          Pi *pi=new Pi(numOfOnes,m_nSecParam, (uint8_t*) m_cConstSeed[player],parties,ports,ips,player);  
 	      
 	      
 	  //--step 2-- hash seed agreement
@@ -384,6 +384,8 @@ int main(int argc, char** argv)
           //--step 7+10-- online apport
           std::mutex mu;
           functions::run_online_apport(pi,test,&fout_com,&mu);
+	  Pi::delete_bf();   
+	     
           //cout<<"end online appROT pi"<<endl;
           start=functions::get_duration(start,fout);
 
