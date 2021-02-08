@@ -76,6 +76,48 @@ TEST(checkTheItem, test1)
 }
 
 
+TEST(arrangeTheIndexes, test1)
+{
+	
+	             //{0,1,1,0 ,0,1,0,0,1 ,0,0 ,1 ,0 ,0 ,1 ,1 ,1 ,0 ,1 ,0 ,1 ,0 ,0 ,1 ,1 ,0,1 ,0 ,1,0 }  //bitstring
+	int indexes_[]={0,1,2,25,4,5,6,7,28,9,10,11,12,13,29,15,16,17,18,19,20,27,26,23,24,3,22,21,8,14}; //Nc=5,Not=30,Not-Nc=25
+	
+	int* indexes=new int[30];
+	for (int i=0;i<30;i++) indexes[i]=indexes_[i];
+	
+	BYTE arr[]={0,1,1,0,1 ,1,0,1,1,0, 0,0,1,0,0, 1,0,0,1,0};
+	Bitstring BF(20,arr);
+    int Nbf=20;
+	
+	crypto* crypt;
+	vector<int>* arr_indexes=new vector<int>[2];
+	
+	int indexes_0[]={10,6 ,9 ,3,17,19,12,4 ,13,7 ,21,0,22};
+	int indexes_1[]={8 ,15,11,1,24,14,5 ,16,23,18,2,20};
+	
+	int indexes_0_[]={0,25,4,6 ,7 ,9 ,10,12,13,17,19,27,26};
+	int indexes_1_[]={1,2 ,5,28,11,29,15,16,18,20,23,24};
+	
+	std::set<int> set_0(indexes_0_,indexes_0_+13);
+	std::set<int> set_1(indexes_1_,indexes_1_+12);
+	
+	arr_indexes[0].insert(arr_indexes[0].end(),indexes_0,indexes_0+13);
+	arr_indexes[1].insert(arr_indexes[1].end(),indexes_1,indexes_1+12);
+	
+	functions::arrange_the_indexes(BF,Nbf,arr_indexes, &indexes,0,0,crypt);
+	
+	set <int> zeros;
+	set <int> ones;
+	
+	for (int i=0;i<Nbf;i++){
+		cout<<indexes[i]<<" ";
+		if ((BF.get_bit(i)==0) && (set_0.find(indexes[i])!=set_0.end())) zeros.insert(indexes[i]);
+		else if((BF.get_bit(i)==1) && (set_1.find(indexes[i])!=set_1.end())) ones.insert(indexes[i]);
+	}
+	EXPECT_EQ(zeros.size(),11);
+	EXPECT_EQ(ones.size(),9);
+}
+
 int main(int argc, char **argv) {
         ::testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
