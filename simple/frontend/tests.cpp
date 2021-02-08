@@ -87,7 +87,7 @@ TEST(arrangeTheIndexes, test1)
 	
 	BYTE arr[]={0,1,1,0,1 ,1,0,1,1,0, 0,0,1,0,0, 1,0,0,1,0};
 	Bitstring BF(20,arr);
-    int Nbf=20;
+        int Nbf=20;
 	
 	crypto* crypt;
 	vector<int>* arr_indexes=new vector<int>[2];
@@ -104,7 +104,7 @@ TEST(arrangeTheIndexes, test1)
 	arr_indexes[0].insert(arr_indexes[0].end(),indexes_0,indexes_0+13);
 	arr_indexes[1].insert(arr_indexes[1].end(),indexes_1,indexes_1+12);
 	
-	functions::arrange_the_indexes(BF,Nbf,arr_indexes, &indexes,0,0,crypt);
+	functions::arrange_the_indexes(BF,Nbf,arr_indexes, &indexes);
 	
 	set <int> zeros;
 	set <int> ones;
