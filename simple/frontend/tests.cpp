@@ -89,7 +89,6 @@ TEST(arrangeTheIndexes, test1)
 	Bitstring BF(20,arr);
         int Nbf=20;
 	
-	crypto* crypt;
 	vector<int>* arr_indexes=new vector<int>[2];
 	
 	int indexes_0[]={10,6 ,9 ,3,17,19,12,4 ,13,7 ,21,0,22};
