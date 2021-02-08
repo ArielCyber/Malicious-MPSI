@@ -389,7 +389,7 @@ void Party::get_zeros_ones(){
 **/
 
 void Party::arrange_the_indexes(){
-   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt);
+   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv);
    //cout<<"indexes were arranged"<<endl;   
 }
 
