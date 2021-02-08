@@ -23,7 +23,7 @@ elseif(NOT ENCRYPTO_utils_FOUND AND NOT TARGET ENCRYPTO_utils::encrypto_utils)
 endif()
 find_package(Threads REQUIRED)
 
-add_library(project_ src/P0.cpp src/Pi.cpp src/MurmurHash.cpp src/Functions.cpp src/Bitstring.cpp src/kos.cpp src/util.cpp)
+add_library(project_ src/Party.cpp src/P0.cpp src/Pi.cpp src/MurmurHash.cpp src/Functions.cpp src/Bitstring.cpp src/kos.cpp src/util.cpp)
 #############################################
 #    Build cryptoTools (common utilities)   #
 #############################################
