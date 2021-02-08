@@ -690,7 +690,7 @@ block* functions::re_randomization(vector <int>& items, block* Y, int n , int Nb
  * @param GBF
 **/
 
-block* functions::check_the_item(set<int>& h_kokhav,int bytes, int Nbf,block* GBF){
+block* functions::check_the_item(set<int>& h_kokhav,block* GBF){
 	
     block* y=new block(0,0);
 
@@ -1428,11 +1428,11 @@ block* functions::compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fst
  * @param GBF the GBF
 **/
 
-void functions::get_intersection( std::set<int>* h_kokhav,int bytes,block* GBF){
+void functions::get_intersection( std::set<int>* h_kokhav,block* GBF){
 	
    cout<<"The intersection: ";
    for (int t=0;t<P0::items_size;t++){
-	block* y=functions::check_the_item(h_kokhav[t],bytes, P0::Nbf,GBF);
+	block* y=functions::check_the_item(h_kokhav[t],GBF);
 	if ((*y)==toBlock(0,0)) cout<<(*P0::items)[t]<<" ";
 	delete y;
    }
