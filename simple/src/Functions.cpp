@@ -151,13 +151,10 @@ void functions::arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_inde
  * @param Nbf Bloom filter's size
  * @param arr_indexes vectors for the 0's indexes and for the 1's indexes
  * @param indexes Array of the indexes of the strings
- * @param Not the size of the bitset and the indexes
- * @param Ncc size of group C
- * @param crypt cryptographic var
  */
 
 	
-void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt){
+void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes){
  
     //array for the new indexes
     int* indexes1=new int[Nbf];
