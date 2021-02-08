@@ -278,7 +278,7 @@ int main(int argc, char** argv)
 	  //--step 12-- output
           //going over the indexes of each h*, xoring them, and checking if the sum is 0. If it is-print the item.
           //cout<<"getting the intersection"<<endl;
-	  functions::get_intersection( h_kokhav,bytes,GBF);
+	  functions::get_intersection( h_kokhav,GBF);
           //cout<<"End of P0"<<endl;
 		
 	  start=functions::get_duration(start,fout);
