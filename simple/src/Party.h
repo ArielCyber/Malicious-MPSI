@@ -78,12 +78,12 @@ public:
        static unsigned long read_as_a_receiver(receiver* recv,void* msg,unsigned long size);
        static unsigned long read_as_a_sender(sender* snd,void* msg,unsigned long size);
 	
-       //setting and sending/receiving the sub group
+       //setting/sending/receiving the sub group
        unsigned long send_sub_group();  
        void set_sub_group();  
        unsigned long recv_C(); 
 
-       //computing/receiving R/r
+       //computing/sending/receiving R/r
        void compute_R_r();
        unsigned long send_R_r();
        unsigned long recv_R();  
