@@ -16,7 +16,7 @@ private:
 public:
 
     Bitstring(int length, int numOfOnes=0, crypto* c=nullptr);
-    Bitstring(int length, int* arr);
+    Bitstring(int length, BYTE* arr);
     void set_bit(int place, int new_val);
     int get_bit(int place) const;
     int get_length() const;
