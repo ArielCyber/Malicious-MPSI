@@ -399,8 +399,6 @@ void functions::compute_r(block& r,std::vector<std::array<block, 2>>& strings,in
 }
 
 
-//#######
-
 /**
  * Finding the indexes of the '0' bit string in the chosen sub group and xoring these strings
  *
@@ -587,6 +585,7 @@ block* functions::re_randomization_zero(vector <int>& items, block* Y, int n , i
     return GBF;
 }
 
+
 /**
  * filling the GBF
  *
@@ -752,7 +751,6 @@ void functions::offline_apport_receiver(Party* party,std::vector<std::string>* i
 
 }
 
-//############
 
 /**
  * performing offline apport as a sender
