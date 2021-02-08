@@ -272,7 +272,7 @@ int main(int argc, char** argv)
 	  //--step 11-- comulative gbfs
           //getting the GBFs from the opponent parties and xoring them 
           //cout<<"computing gbf p0"<<endl;
-	  block* GBF=functions::compute_gbf1(P0_s,Nbf,test,&fout_com);
+	  block* GBF=functions::compute_gbf(P0_s,Nbf,test,&fout_com);
           start=functions::get_duration(start,fout);
 
 	  //--step 12-- output
