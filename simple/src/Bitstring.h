@@ -11,7 +11,6 @@ private:
 
     BYTE* arr;
     int length;
-    int bytes;
 
 public:
 
