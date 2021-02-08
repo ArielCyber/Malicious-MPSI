@@ -812,7 +812,7 @@ void functions::online_apport_receiver(Party* party, synchGBF* test, fstream* fo
     party->send_func();
 
     //xoring the GBF
-    party->create_RBF_receiver(test);
+    party->xor_RBF_receiver(test);
 }
 
 
@@ -829,7 +829,7 @@ void functions::online_apport_sender(Party* party, synchGBF* test,fstream* fout,
     party->recv_func();
 	
     //xoring the GBF
-    party->create_RBF_sender(test);
+    party->xor_RBF_sender(test);
 }
 
 
