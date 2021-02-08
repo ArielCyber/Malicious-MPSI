@@ -1,5 +1,6 @@
 #include "Party.h"
 
+//static attributes
 int Party::Nbf=0;
 int Party::Nc_sender=0;
 Bitstring* Party::BF=nullptr; 
@@ -9,29 +10,37 @@ int Party::seeds_num=0;
 int Party::items_size=0;
 int Party::maxOnes=0; 
 
+
+//c'tor
 Party::Party(int numOfOnes,uint32_t m_nSecParam,uint8_t* constSeed ){
 	
-	 sub_group_sender=nullptr;
+     //initialization of the attributes
+     sub_group_sender=nullptr;
      sub_group_recv=nullptr;
      R_sender=nullptr;
      R_recv=nullptr;
      func_sender=nullptr;
      func_recv=nullptr;	
 	 
+     //setting vectors for the receiver/sender's strings 
      strings_choices=new std::vector<block>(Not);
      strings=new std::vector<std::array<block, 2>>(Not);
 	 
-	 crypt = new crypto(m_nSecParam, constSeed);
-	 
-	 bitvector=new BitVector(Not);
+     //setting cryptographic attribute
+     crypt = new crypto(m_nSecParam, constSeed);
+	
+     //setting bitstring with the chosen number of 1's
+     bitvector=new BitVector(Not);
 
-	 Bitstring* b1=new Bitstring(Not,numOfOnes,crypt);
-        for (int i=0;i<Not;i++){
-		(*bitvector)[i]=b1->get_bit(i);
-        }		
-	 delete b1;
+     Bitstring* b1=new Bitstring(Not,numOfOnes,crypt);
+     for (int i=0;i<Not;i++){
+	(*bitvector)[i]=b1->get_bit(i);
+     }		
+     delete b1;
 }
 
+
+//setting common attributes
 void Party::set(vector<int>* items,int items_size,int Nbf,int n,int Nc,int string_length,int maxOnes,int seeds_num){
 	
     //cout<<"setting the items"<<endl;
@@ -55,9 +64,52 @@ void Party::set(vector<int>* items,int items_size,int Nbf,int n,int Nc,int strin
 	 
     //cout<<"setting seeds num"<<endl;
     Party::seeds_num=seeds_num;	
-}	 
-	 
-	 
+}
+
+
+/**
+     getters
+**/
+
+crypto* Party::getCrypto(){
+   return crypt;
+}
+
+BitVector* Party::getChoices() const{
+    return bitvector;
+}
+
+std::vector<block>& Party::getStringsReceiver(){
+    return *strings_choices;
+}
+
+std::vector<std::array<block, 2>>& Party::getStrings(){
+    //cout<<"strings:"<<strings->size();
+    return *strings;
+}
+
+int Party::getNot() const{
+	return Not;
+}
+
+int Party::getSeedsNum() const{
+    return seeds_num;
+}
+
+
+//initialization of the sender
+void Party::init_sender( int port){
+     init_sender(&s,port);
+}
+
+
+//initialization of the receiver
+void Party::init_receiver(const char* ip,int port){ 
+     init_receiver(&recv,ip,port);
+}
+
+
+//initialization of a server
 void Party::init_sender(struct sender* s, int port){
   
      s->sock = socket(AF_INET, SOCK_STREAM, 0);  
@@ -80,15 +132,9 @@ void Party::init_sender(struct sender* s, int port){
      s->connect_sock = accept(s->sock, (struct sockaddr *)&s->serv_name, &s->len);
 
 }
-void Party::init_sender( int port){
-     init_sender(&s,port);
-}
-	
 
-void Party::init_receiver(const char* ip,int port){ 
-     init_receiver(&recv,ip,port);
-}
 
+//initialization of a client
 void Party::init_receiver(struct receiver* recv,const char* ip,int port){ 
 	
      //printf("Client is alive and establishing socket connection.\n");
@@ -114,8 +160,9 @@ void Party::init_receiver(struct receiver* recv,const char* ip,int port){
 }	
 
 
-
-
+/**
+  writing/reading as a sender/reciever
+**/
 
 unsigned long Party::write_as_a_sender(void* msg,unsigned long size){
     unsigned long left=size;
@@ -126,18 +173,6 @@ unsigned long Party::write_as_a_sender(void* msg,unsigned long size){
            left-=n;
            sum+=n;
     }
-    return sum;
-}
-
-unsigned long Party::write_as_a_sender(sender* snd,void* msg,unsigned long size){
-    unsigned long left=size;
-    unsigned long n;
-    unsigned long sum=0;
-    while (left){
-           n=write(snd->connect_sock, &((char*)msg)[size-left],left);
-           left-=n;
-           sum+=n;
-    }	 
     return sum;
 }
 
@@ -154,37 +189,12 @@ unsigned long Party::read_as_a_sender(void* msg,unsigned long size){
     return sum;	 
 }
 
-unsigned long Party::read_as_a_sender(sender* snd,void* msg,unsigned long size){
-     unsigned long left=size;
-     unsigned long n;
-     unsigned long sum=0;	 
-     memset(msg,0,(unsigned long)size);
-     while (left){
-           n=read(snd->connect_sock, &((char*)msg)[size-left],left);
-           left-=n;
-           sum+=n;
-     }
-     return sum;	 
-}
-	 
 unsigned long Party::write_as_a_receiver(void* msg,unsigned long size){
     unsigned long left=size;
     unsigned long n;
     unsigned long sum=0;
     while (left){
            n=write(recv.sock, &((char*)msg)[size-left],left);
-           left-=n;
-           sum+=n;
-    }
-    return sum;
-}
-
-unsigned long Party::write_as_a_receiver(receiver* recv,void* msg,unsigned long size){
-    unsigned long left=size;
-    unsigned long n;
-    unsigned long sum=0;
-    while (left){
-           n=write(recv->sock, &((char*)msg)[size-left],left);
            left-=n;
            sum+=n;
     }
@@ -203,6 +213,48 @@ unsigned long Party::read_as_a_receiver(void* msg,unsigned long size){
     }
 	
     return sum;	 
+}	 
+
+
+/**
+   writing/reading from/to a socket
+**/
+
+unsigned long Party::write_as_a_sender(sender* snd,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
+    while (left){
+           n=write(snd->connect_sock, &((char*)msg)[size-left],left);
+           left-=n;
+           sum+=n;
+    }	 
+    return sum;
+}
+
+unsigned long Party::read_as_a_sender(sender* snd,void* msg,unsigned long size){
+     unsigned long left=size;
+     unsigned long n;
+     unsigned long sum=0;	 
+     memset(msg,0,(unsigned long)size);
+     while (left){
+           n=read(snd->connect_sock, &((char*)msg)[size-left],left);
+           left-=n;
+           sum+=n;
+     }
+     return sum;	 
+}
+
+unsigned long Party::write_as_a_receiver(receiver* recv,void* msg,unsigned long size){
+    unsigned long left=size;
+    unsigned long n;
+    unsigned long sum=0;
+    while (left){
+           n=write(recv->sock, &((char*)msg)[size-left],left);
+           left-=n;
+           sum+=n;
+    }
+    return sum;
 }
 
 unsigned long Party::read_as_a_receiver(receiver* recv,void* msg,unsigned long size){
@@ -221,6 +273,131 @@ unsigned long Party::read_as_a_receiver(receiver* recv,void* msg,unsigned long s
 }
 
 
+/**
+   setting a random sub group of indexes (size: Nc_sender)
+**/
+
+void Party::set_sub_group(){
+	
+    //creating seed
+    unsigned long x1;
+    unsigned long x2;
+    crypt->gen_rnd((BYTE*)&x1,8);
+    crypt->gen_rnd((BYTE*)&x2,8);
+    seed_sub_group=toBlock(x1,x2);
+	
+    //getting sub group
+    sub_group_sender=new int[Nc_sender];
+    functions::get_sub_group(sub_group_sender,Not,Nc_sender,seed_sub_group);
+   
+    //cout<<"sub group was set"<<endl;
+}
+
+
+/**
+   sending/receiving the sub group
+**/
+
+unsigned long Party::send_sub_group(){
+    unsigned long sum=write_as_a_sender( &Nc_sender,sizeof(int));		   
+    sum+=write_as_a_sender( &seed_sub_group,sizeof(block));
+    //cout<<"sub group was sent"<<endl;
+    return sum;
+}
+
+unsigned long Party::recv_C(){
+    unsigned long sum=read_as_a_receiver(&Nc_recv,sizeof(int));
+    sub_group_recv=new int[Nc_recv];
+    block seed_recv;
+    sum+=read_as_a_receiver( &seed_recv, sizeof(block));
+    functions::get_sub_group(sub_group_recv,Not,Nc_recv,seed_recv);
+    return sum;
+}
+
+
+ /**
+   computing R/r accordingly to the received sub group
+ **/
+
+void Party::compute_R_r(){
+    func_recv=new int[Not];
+    for (int i=0;i<Not;i++) func_recv[i]=i;
+    R_recv=new std::vector<int>;
+    functions::compute_R_r(sub_group_recv,func_recv,bitvector,Nc_recv,Not,*strings_choices,r_recv,*R_recv);  
+    if (sub_group_recv!=nullptr) delete [] sub_group_recv;
+    Nr_recv=(*R_recv).size();
+    //cout<<"Nr: "<<Nr_recv<<endl<<endl;
+    //cout<<"r* (P0): "<<r_recv;
+    //cout<<endl<<endl;
+    //cout<<"r and R were computed"<<endl;
+}
+
+
+ /**
+   sending/receiving R/r
+ **/
+
+unsigned long Party::send_R_r(){
+    unsigned long sum=write_as_a_receiver(&Nr_recv,sizeof(int));		
+    int arr[Nr_recv];
+    for (int i=0;i<Nr_recv;i++)
+    arr[i]=(*R_recv)[i];		
+    if (R_recv!=nullptr) delete R_recv;
+    sum+=write_as_a_receiver(arr,sizeof(int)*Nr_recv);
+    sum+=write_as_a_receiver(&r_recv,sizeof(block));
+    //cout<<"r and R were sent"<<endl;
+    return sum;
+}
+
+unsigned long Party::recv_R(){
+     unsigned long sum=read_as_a_sender(&Nr_sender,sizeof(int));
+     //cout<<"From Alice: Nr: "<<Nr_sender<<endl<<endl;
+     R_sender=new int[Nr_sender];
+     sum+=read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
+     sum+=read_as_a_sender(&r_sender,sizeof(block));
+     //cout<<"From Alice: r* (Alice): ";
+     //cout<<r_sender;
+     //cout<<endl;
+     //cout<<"R and r were received"<<endl;
+     return sum;
+}
+
+
+/**
+   creation of the Bloom filter
+**/
+
+void Party::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){  
+    BF=new Bitstring(Nbf); 
+    functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);   
+    //cout<<"BF was created"<<endl;  
+}
+
+
+/**
+   creating vectors of the 0's/1's indexes
+   The indexes are shuffled
+**/
+
+void Party::get_zeros_ones(){
+     functions::get_zeros_ones(bitvector, Not, Nc_recv, arr_indexes,crypt);
+}
+
+
+/**
+   arranging the indexes accordingly to th BF's bits
+**/
+
+void Party::arrange_the_indexes(){
+   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt);
+   //cout<<"indexes were arranged"<<endl;   
+}
+
+
+/**
+   sending/receiving the generated function
+**/
+
 unsigned long Party::recv_func(){
      func_sender=new int[Nbf];
      unsigned long sum=read_as_a_sender(func_sender,sizeof(int)*Nbf);
@@ -234,28 +411,31 @@ unsigned long Party::send_func(){
     return sum;	
 }
 
-void Party::arrange_the_indexes(){
-   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt);
-   //cout<<"indexes were arranged"<<endl;   
-}
 
-void Party::get_zeros_ones(){
-     functions::get_zeros_ones(bitvector, Not, Nc_recv, arr_indexes,crypt);
-}
+/**
+   xoring the strings of the receiver/sender with the synchGBF object, 
+   (which is common to all the P0's instances)
+**/
 
-void Party::create_RBF_receiver(synchGBF* test){
+void Party::xor_RBF_receiver(synchGBF* test){
    test->XORordered(strings_choices,func_recv);
    //cout<<"rbf was created"<<endl;
    if (func_recv!=nullptr) delete [] func_recv;
    if (strings_choices!=nullptr) delete strings_choices;
 }
 
-void Party::create_RBF_sender(synchGBF* test){
+void Party::xor_RBF_sender(synchGBF* test){
     test->XORorderedBF(strings, func_sender,BF);
     //cout<<"RBF was created"<<endl;
 	if (func_sender!=nullptr) delete [] func_sender;  
     if (strings!=nullptr) delete strings;
 }	
+
+
+/**
+   checking if the protocol is secure enougth. 
+   if not- the execution will be stopped.
+**/
 
 int Party::check_if_to_abort(){
 
@@ -309,9 +489,6 @@ int Party::check_if_to_abort1(){
 }
 
 
-
-
-
 int Party::check_if_to_abort2(){
 	int i;
     if (functions::if_disjoint_sets(sub_group_sender,Nc_sender,func_sender,Nbf,Not)==0){
@@ -332,108 +509,14 @@ int Party::check_if_to_abort2(){
     }
 }
 
-void Party::compute_R_r(){
-    func_recv=new int[Not];
-    for (int i=0;i<Not;i++) func_recv[i]=i;
-    R_recv=new std::vector<int>;
-    functions::compute_R_r(sub_group_recv,func_recv,bitvector,Nc_recv,Not,*strings_choices,r_recv,*R_recv);  
-    if (sub_group_recv!=nullptr) delete [] sub_group_recv;
-    Nr_recv=(*R_recv).size();
-    //cout<<"Nr: "<<Nr_recv<<endl<<endl;
-    //cout<<"r* (P0): "<<r_recv;
-    //cout<<endl<<endl;
-    //cout<<"r and R were computed"<<endl;
-}
 
-unsigned long Party::recv_C(){
-    unsigned long sum=read_as_a_receiver(&Nc_recv,sizeof(int));
-    //cout<<"From P0: Nc: "<<Nc_recv<<endl<<endl;
-    sub_group_recv=new int[Nc_recv];
-    block seed_recv;
-    sum+=read_as_a_receiver( &seed_recv, sizeof(block));
-    functions::get_sub_group(sub_group_recv,Not,Nc_recv,seed_recv);
-    return sum;
-}
-
-unsigned long Party::send_R_r(){
-    unsigned long sum=write_as_a_receiver(&Nr_recv,sizeof(int));		
-    int arr[Nr_recv];
-    for (int i=0;i<Nr_recv;i++)
-    arr[i]=(*R_recv)[i];		
-    if (R_recv!=nullptr) delete R_recv;
-    sum+=write_as_a_receiver(arr,sizeof(int)*Nr_recv);
-    sum+=write_as_a_receiver(&r_recv,sizeof(block));
-    //cout<<"r and R were sent"<<endl;
-    return sum;
-}
-
-unsigned long Party::recv_R(){
-     unsigned long sum=read_as_a_sender(&Nr_sender,sizeof(int));
-     //cout<<"From Alice: Nr: "<<Nr_sender<<endl<<endl;
-     R_sender=new int[Nr_sender];
-     sum+=read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
-     sum+=read_as_a_sender(&r_sender,sizeof(block));
-     //cout<<"From Alice: r* (Alice): ";
-     //cout<<r_sender;
-     //cout<<endl;
-     //cout<<"R and r were received"<<endl;
-     return sum;
-}
-
-void Party::set_sub_group(){
-	
-    //creating seed
-    unsigned long x1;
-    unsigned long x2;
-    crypt->gen_rnd((BYTE*)&x1,8);
-    crypt->gen_rnd((BYTE*)&x2,8);
-    seed_sub_group=toBlock(x1,x2);
-	
-    //getting sub group
-    sub_group_sender=new int[Nc_sender];
-    functions::get_sub_group(sub_group_sender,Not,Nc_sender,seed_sub_group);
-    //cout<<"sub group was set"<<endl;
-}
-
-unsigned long Party::send_sub_group(){
-    unsigned long sum=write_as_a_sender( &Nc_sender,sizeof(int));		   
-    sum+=write_as_a_sender( &seed_sub_group,sizeof(block));
-    //cout<<"sub group was sent"<<endl;
-    return sum;
-}
-
-crypto* Party::getCrypto(){
-   return crypt;
+//deleting the bloom filter
+void Party::delete_bf(){
+     if (BF!=nullptr) delete BF;
 }
 
 
-void Party::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){  
-    BF=new Bitstring(Nbf); 
-    functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);   
-    //cout<<"BF was created"<<endl;  
-}
-
-BitVector* Party::getChoices() const{
-    return bitvector;
-}
-
-std::vector<block>& Party::getStringsReceiver(){
-    return *strings_choices;
-}
-
-std::vector<std::array<block, 2>>& Party::getStrings(){
-    //cout<<"strings:"<<strings->size();
-    return *strings;
-}
-
-int Party::getNot() const{
-	return Not;
-}
-
-int Party::getSeedsNum() const{
-    return seeds_num;
-}
-
+//d'tor
 Party::~Party(){
    close(recv.sock);
    close(s.connect_sock);
@@ -441,6 +524,3 @@ Party::~Party(){
    delete crypt;
 }
 
-void Party::delete_bf(){
-     if (BF!=nullptr) delete BF;
-}
