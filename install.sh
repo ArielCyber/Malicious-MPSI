@@ -2,7 +2,6 @@
 sudo apt-get update
 sudo apt-get upgrade
 
-
 #install libraries
 sudo apt install make
 sudo apt install libgmp-dev
