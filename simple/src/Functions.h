@@ -322,7 +322,7 @@ namespace functions{
     unsigned int* get_seeds(int seeds_num, block seed);	
     block* re_randomization(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* r);
     block* re_randomization_zero(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test);
-    block* check_the_item(set<int>& h_kokhav,int bytes, int Nbf,block* GBF);
+    block* check_the_item(set<int>& h_kokhav,block* GBF);
 
 
     void offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player,fstream* fout,std::mutex* mu);
@@ -356,7 +356,7 @@ namespace functions{
 	
     std::chrono::steady_clock::time_point get_duration(std::chrono::steady_clock::time_point& start,fstream& fout);
 	
-    void get_intersection( std::set<int>* h_kokhav,int bytes,block* GBF);
+    void get_intersection( std::set<int>* h_kokhav,block* GBF);
     block* get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y, synchGBF* test);
     void comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout);
 
