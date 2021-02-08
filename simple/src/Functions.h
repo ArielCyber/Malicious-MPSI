@@ -367,9 +367,9 @@ namespace functions{
 
     void get_zeros_ones(BitVector* b, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt);
 	
-    block* compute_gbf1(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);  
+    block* compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);  
 	
-    void get_gbf1(P0* p0, synchGBF* test,unsigned long* data,int player);
+    void get_gbf(P0* p0, synchGBF* test,unsigned long* data,int player);
 	
     void secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout);
     void secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv);
