@@ -50,7 +50,7 @@ Bitstring::Bitstring(int length, int numOfOnes,crypto* c):length(length){
 
 }
 
-Bitstring(int length, int* arr){
+Bitstring(int length, BYTE* arr):length(length){
 	this->arr=new BYTE[length];
 	for(int i=0;i<length;i++) this->arr[i]=arr[i];
 }
