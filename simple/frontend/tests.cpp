@@ -116,6 +116,30 @@ TEST(arrangeTheIndexes, test1)
 	EXPECT_EQ(ones.size(),9);
 }
 
+TEST(compute_r, test1){
+
+	
+	std::vector <std::array<block, 2>> strings{{toBlock(8667565670,34632836472),toBlock(73673436754,3264736)},
+	{toBlock(454364563453454,73647235645),toBlock(87237478263,53241423123)},
+	{toBlock(87384636274,43434378248),toBlock(4798676554453,878767565454332)},
+	{toBlock(54432287767,95415689),toBlock(7653211887654322,94321679325780)},
+	{toBlock(78665433355,11243465767),toBlock(98766545453435,76867675657656)},
+	{toBlock(653211678898,7321456778978),toBlock(38765321988432,86554453453434)},
+	{toBlock(422189878786,96645654533),toBlock(2998778656006,7675656432323)},
+	{toBlock(875564534226,1557567564567),toBlock(555463456688,775769988976)},
+	{toBlock(453465653543,2443535634534),toBlock(3654353463453,2432453465346)}};
+	int indexes[]={0,3,4,8};
+	int indexes_size=4;
+
+	block r_res;	
+	functions::compute_r(r_res,strings,indexes,indexes_size);
+	
+	block r_exp=toBlock(504334762589,2415479993520);
+	EXPECT_EQ(r_res,r_exp);
+}
+
+
+
 int main(int argc, char **argv) {
         ::testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
