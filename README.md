@@ -1,6 +1,6 @@
 # Malicious_MPSI
 
-**Implementation of the PSImple protocol** https://eprint.iacr.org/2021/122
+**Implementation of the PSImple protocol:** https://eprint.iacr.org/2021/122
 
 **Running the protocol (we used ubuntu 18.04) :**
 
