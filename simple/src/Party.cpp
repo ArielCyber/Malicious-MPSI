@@ -43,26 +43,13 @@ Party::Party(int numOfOnes,uint32_t m_nSecParam,uint8_t* constSeed ){
 //setting common attributes
 void Party::set(vector<int>* items,int items_size,int Nbf,int n,int Nc,int string_length,int maxOnes,int seeds_num){
 	
-    //cout<<"setting the items"<<endl;
     Party::items=items;
     Party::items_size=items_size;
-	 
-    //cout<<"setting Nbf"<<endl;
     Party::Nbf=Nbf;
-	 
-    //cout<<"setting BF"<<endl;
     BF=new Bitstring(Nbf);
-	 
-    //cout<<"setting Not"<<endl;
     Party::Not=n;
-	 
-    //cout<<"setting Nc"<<endl;
     Party::Nc_sender=Nc;
-	 
-    //cout<<"setting maxOnes"<<endl;
     Party::maxOnes=maxOnes;
-	 
-    //cout<<"setting seeds num"<<endl;
     Party::seeds_num=seeds_num;	
 }
 
@@ -125,7 +112,6 @@ void Party::init_sender(struct sender* s, int port){
          perror ("Error naming channel");
      }
       
-     //printf("Server is alive and waiting for socket connection from client.\n");
      listen(s->sock, 1); 
 
      s->len = sizeof(s->serv_name);
@@ -137,7 +123,6 @@ void Party::init_sender(struct sender* s, int port){
 //initialization of a client
 void Party::init_receiver(struct receiver* recv,const char* ip,int port){ 
 	
-     //printf("Client is alive and establishing socket connection.\n");
      recv->sock = socket(AF_INET, SOCK_STREAM, 0);
 	
      if (recv->sock < 0){ 
@@ -289,8 +274,6 @@ void Party::set_sub_group(){
     //getting sub group
     sub_group_sender=new int[Nc_sender];
     functions::get_sub_group(sub_group_sender,Not,Nc_sender,seed_sub_group);
-   
-    //cout<<"sub group was set"<<endl;
 }
 
 
@@ -301,7 +284,6 @@ void Party::set_sub_group(){
 unsigned long Party::send_sub_group(){
     unsigned long sum=write_as_a_sender( &Nc_sender,sizeof(int));		   
     sum+=write_as_a_sender( &seed_sub_group,sizeof(block));
-    //cout<<"sub group was sent"<<endl;
     return sum;
 }
 
@@ -326,10 +308,6 @@ void Party::compute_R_r(){
     functions::compute_R_r(sub_group_recv,func_recv,bitvector,Nc_recv,Not,*strings_choices,r_recv,*R_recv);  
     if (sub_group_recv!=nullptr) delete [] sub_group_recv;
     Nr_recv=(*R_recv).size();
-    //cout<<"Nr: "<<Nr_recv<<endl<<endl;
-    //cout<<"r* (P0): "<<r_recv;
-    //cout<<endl<<endl;
-    //cout<<"r and R were computed"<<endl;
 }
 
 
@@ -351,14 +329,9 @@ unsigned long Party::send_R_r(){
 
 unsigned long Party::recv_R(){
      unsigned long sum=read_as_a_sender(&Nr_sender,sizeof(int));
-     //cout<<"From Alice: Nr: "<<Nr_sender<<endl<<endl;
      R_sender=new int[Nr_sender];
      sum+=read_as_a_sender(R_sender,sizeof(int)*Nr_sender);
      sum+=read_as_a_sender(&r_sender,sizeof(block));
-     //cout<<"From Alice: r* (Alice): ";
-     //cout<<r_sender;
-     //cout<<endl;
-     //cout<<"R and r were received"<<endl;
      return sum;
 }
 
@@ -369,8 +342,7 @@ unsigned long Party::recv_R(){
 
 void Party::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, block seed){  
     BF=new Bitstring(Nbf); 
-    functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);   
-    //cout<<"BF was created"<<endl;  
+    functions::create_BF_threads( h_kokhav,items, items_size, BF,Nbf,seeds_num,hash_seeds, seed);    
 }
 
 
@@ -390,7 +362,6 @@ void Party::get_zeros_ones(){
 
 void Party::arrange_the_indexes(){
    functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv);
-   //cout<<"indexes were arranged"<<endl;   
 }
 
 
@@ -401,13 +372,11 @@ void Party::arrange_the_indexes(){
 unsigned long Party::recv_func(){
      func_sender=new int[Nbf];
      unsigned long sum=read_as_a_sender(func_sender,sizeof(int)*Nbf);
-     //cout<<"func was received"<<endl;
      return sum;
 }
 
 unsigned long Party::send_func(){
     unsigned long sum=write_as_a_receiver(func_recv,sizeof(int)*Nbf);
-    //cout<<"func was sent"<<endl;
     return sum;	
 }
 
@@ -419,14 +388,12 @@ unsigned long Party::send_func(){
 
 void Party::xor_RBF_receiver(synchGBF* test){
    test->XORordered(strings_choices,func_recv);
-   //cout<<"rbf was created"<<endl;
    if (func_recv!=nullptr) delete [] func_recv;
    if (strings_choices!=nullptr) delete strings_choices;
 }
 
 void Party::xor_RBF_sender(synchGBF* test){
     test->XORorderedBF(strings, func_sender,BF);
-    //cout<<"RBF was created"<<endl;
 	if (func_sender!=nullptr) delete [] func_sender;  
     if (strings!=nullptr) delete strings;
 }	
@@ -445,7 +412,6 @@ int Party::check_if_to_abort(){
        return 1;
     }
     else{
-       //cout<<"Nc<=Not-Nbf: session continues"<<endl;
        return 0;
     }
 }
@@ -465,10 +431,8 @@ int Party::check_if_to_abort1(){
 	int flag=0;
 	block r1;
 	functions::compute_r(r1,*strings, R_sender,Nr_sender);
-	//cout<<endl<<"r*(Alice) :"<<r1;
         if (neq(r1,r_sender))
         flag=1;
-	//cout<<endl<<endl;
 
 	if (flag==1){
 	     cout<<"r* is not OK: session has been stopped"<<endl;
@@ -480,7 +444,6 @@ int Party::check_if_to_abort1(){
              return 1;
         }
         else{
-	     //cout<<"Ncc-Nr<=Nmaxones && r*(Alice)==r*(Alice): session continues"<<endl;
 	     if (R_sender!=nullptr) delete [] R_sender;
 	     return 0;
         }
@@ -502,7 +465,6 @@ int Party::check_if_to_abort2(){
     }
     else{
 	if (sub_group_sender!=nullptr) delete [] sub_group_sender;
-	//cout<<"the function and the sub group are disjoint: session continues"<<endl;
 	i=0;
 	write_as_a_sender(&i,sizeof(int));		
         return 0;	
