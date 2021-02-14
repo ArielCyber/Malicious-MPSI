@@ -9,11 +9,12 @@
 int main(int argc, char** argv)
 {	
   
+	
+	
 	//-- step 1-- getting parameters
 
 	//getting our protocol vals
 
-	//cout<<"getting the protocols  vals"<<endl;
 	int player=atoi(argv[1]);
 	const char* cfg_file=argv[2];
 	string ip_file,values_file;
@@ -23,10 +24,8 @@ int main(int argc, char** argv)
 	uint32_t k=128;
 	uint32_t bytes = int(k/8);
 	vector <int> items;
-	//cout<<"values:"<<values_file;
 	functions::get_values(values_file,items);
 	int items_size=items.size();
-	//cout<<"data size: "<<items.size()<<endl;
 
 	//getting the ips of the players
 	std::vector <string> ips;
@@ -87,16 +86,11 @@ int main(int argc, char** argv)
 	//if p0
         if (player==0){
 
-	  //fout<<"Setup, Offline, Online,\n";
           fout<<"Step 2 (setup), Steps 3+4(Offline AppROT), Step 6 (BF), Steps 7+10 ( Online AppROT), Step 11 (XOR), Step 12(output)"<<endl;
 
 		
 		
 	  //--step 2-- hash seed agreement
-
-          //auto test1 = std::chrono::steady_clock::now();
-     
-          //cout<<"creating p0"<<endl;
      
 	  //init P0 common vars
 	  P0::set(&items,items_size,Nbf,numOTs,Nc,bytes,maxOnes,seeds_num);
@@ -104,8 +98,6 @@ int main(int argc, char** argv)
           std::vector<P0*> P0_s;
           //resizing it
           P0_s.resize(parties-1);
-          //std::cout<<"p0 size:"<<P0_s.size()<<std::endl;
-          //auto test2 = std::chrono::steady_clock::now();
 
           std::vector<std::thread*> threads;
       
@@ -118,10 +110,6 @@ int main(int argc, char** argv)
           for (auto& t:threads) t->join();
           for (auto& t:threads) delete t;  
           threads.clear();
-  
-          //auto test3 = std::chrono::steady_clock::now();
-
-          //cout<<"sharing secret"<<endl;
       
           //the keys of p0 for each pi
           block* keys=new block[parties-1];
@@ -131,10 +119,7 @@ int main(int argc, char** argv)
           //p0 generates keys from the crypto var
           //After that, he gets/sends the keys from/to the rest of the parties
           functions::secret_sharing_seed_p0(P0_s,parties,keys,keys_recv,&fout_com);
-       
-          //auto test4 = std::chrono::steady_clock::now();
-         
-          //cout<<"setting seed-commit"<<endl;
+
           //seed and commit of p0
 	  block seed;
 	  Commit commit;
@@ -143,8 +128,6 @@ int main(int argc, char** argv)
           crypto *crypt_ = new crypto(m_nSecParam, (uint8_t*) m_cConstSeed[0]);
           //generating random seed using the crypto var, and from this seed generating Commit object
 	  functions::set_seed_commit(commit, seed, crypt_);
-       
-          //auto test5 = std::chrono::steady_clock::now();
 	    
           //agreement
           //cout<<"seeds agreement"<<endl;
@@ -159,22 +142,12 @@ int main(int argc, char** argv)
           //taking the common seed which was clculated before
           //taking "messages" from 0 to the num of seeds which we need
           //activating on it AES function
-          //cout<<"computing seeds"<<endl;
 	  unsigned int* hash_seeds=functions::get_seeds(seeds_num,seed);
-
-          //auto test6 = std::chrono::steady_clock::now();
-
-          /*
-	  std::cout<<"1-2 = "<<std::chrono::duration_cast<std::chrono::milliseconds>(test2-test1).count()<<std::endl;
-          std::cout<<"2-3 = "<<std::chrono::duration_cast<std::chrono::milliseconds>(test3-test2).count()<<std::endl;
-          std::cout<<"3-4 = "<<std::chrono::duration_cast<std::chrono::milliseconds>(test4-test3).count()<<std::endl;
-          std::cout<<"4-5 = "<<std::chrono::duration_cast<std::chrono::milliseconds>(test5-test4).count()<<std::endl;
-          std::cout<<"5-6 = "<<std::chrono::duration_cast<std::chrono::milliseconds>(test6-test5).count()<<std::endl;
-	  */
 		
           start=functions::get_duration(start,fout);
 
 
+		
           //--steps 3+4+5-- offline apport + AES
       
           //secret sharing AES
@@ -182,11 +155,8 @@ int main(int argc, char** argv)
           //for each key- takes the key and each "message" from 0 to Nbf and activates AES function
           //After finishing, all the results are xored
 
-          //cout<<"secret aes"<<endl;
-
           if(parties>2)
           {
-             //cout<<"Secret-sharing executed"<<endl;
              threads.push_back(new thread(functions::secret_sharing_aes,parties,Nbf,test,keys,keys_recv));
           }
 
@@ -212,7 +182,6 @@ int main(int argc, char** argv)
           //   r will be the xoring result of the corresponding strings
 	  //4) sending R and r*
       
-          //cout<<"offline apport"<<endl;
           std::mutex mu;
 	  for (int i=0;i<(parties-1);i++){
               int other_player=i+1;
@@ -225,12 +194,9 @@ int main(int argc, char** argv)
 
 	  start=functions::get_duration(start,fout);
 
-
-		
+	
 
           //--steps 6-- compute BF
-
-          //cout<<"creating bf"<<endl;
 
           //creating bloom filter using AES
           //setting the common seed as key,and the item val xored with numbers from 0 to the hush functions num as messages
@@ -244,6 +210,8 @@ int main(int argc, char** argv)
 
           start=functions::get_duration(start,fout);
 
+		
+		
 	  //--steps 7+10-- online apport
 		
           //as a sender-	
@@ -251,8 +219,6 @@ int main(int argc, char** argv)
 		
           //as a receiver-
           //creating function according to the BF bits and sending it to the other party
-
-          //cout<<"online apport"<<endl;
 
 	  for (int i=0;i<(parties-1);i++){
                 threads.push_back(new thread(functions::run_online_apport,P0_s[i],test,&fout_com,&mu));
@@ -262,45 +228,43 @@ int main(int argc, char** argv)
 	  for (auto& t:threads) delete t;
 	  threads.clear();
 
-          //cout<<"end online appROT P0"<<endl;
-
           //freeing memory
           P0::delete_bf();
 
           start=functions::get_duration(start,fout);
-
+		
+		
+		
 	  //--step 11-- comulative gbfs
           //getting the GBFs from the opponent parties and xoring them 
-          //cout<<"computing gbf p0"<<endl;
 	  block* GBF=functions::compute_gbf(P0_s,Nbf,test,&fout_com);
+		
           start=functions::get_duration(start,fout);
 
+		
+		
 	  //--step 12-- output
           //going over the indexes of each h*, xoring them, and checking if the sum is 0. If it is-print the item.
-          //cout<<"getting the intersection"<<endl;
 	  functions::get_intersection( h_kokhav,GBF);
-          //cout<<"End of P0"<<endl;
 		
 	  start=functions::get_duration(start,fout);
 
           fout<<endl;
 	  fout.close();
           delete crypt_;  
-
-          //std::cout<<"exit";
 		
       }
 
       // if pi
       else{
 
-          //fout<<"Setup, Offline, Online\n";
           fout<<"Step 2, Steps 3+4+5, Step 6 (BF), Steps 7+10 ( Online AppROT), Step 8, Step 9, Step 11"<<endl;
 
           //init Pi                                                                                                                                                                                                                         Pi *pi=new Pi(items,items_size,numOTs,Nbf,Nc,k,maxOnes,seeds_num,numOfOnes,crypt,parties,ports,ips,player);  
           //setting all its attributes
 	  Pi::set(&items,items_size,Nbf,numOTs,Nc,bytes,maxOnes,seeds_num);
           Pi *pi=new Pi(numOfOnes,m_nSecParam, (uint8_t*) m_cConstSeed[player],parties,ports,ips,player);  
+	      
 	      
 	      
 	  //--step 2-- hash seed agreement
@@ -334,18 +298,15 @@ int main(int argc, char** argv)
 
           start=functions::get_duration(start,fout);
 
-
-	      
+ 
 	      
 	  //--steps 3+4-- offline_apport
           if (parties>2){
-                 //cout<<"Offline_app_ROT executed"<<endl;
                  std::mutex mu;
 		 //running offline apport as a receiver and as a sender
 	         thread* t1=new thread(functions::run_offline_apport,pi,&ips,ports,player,0,&fout_com,&mu);
 
                  //--step 5-- distribution of gbf shares
-                 //cout<<"Secret-sharing exectued"<<endl;
 		 //calculating the secret using all the keys we have been received and AES
 	         thread* t2=new thread(functions::secret_sharing_aes,parties,Nbf,test,keys,keys_recv);
 
@@ -358,7 +319,6 @@ int main(int argc, char** argv)
 	      
           else//only 2 parties, no secret-sharing
           {
-                 //cout<<"Offline_app_ROT executed"<<endl;
                  std::mutex mu;
                  functions::run_offline_apport(pi,&ips,ports,player,0,&fout_com,&mu);
           }
@@ -370,6 +330,7 @@ int main(int argc, char** argv)
           start=functions::get_duration(start,fout);
  
 
+	      
           //Online phase
 
           //--step 6-- compute BF
@@ -381,32 +342,32 @@ int main(int argc, char** argv)
 
           start=functions::get_duration(start,fout);
 
+	      
+	      
           //--step 7+10-- online apport
           std::mutex mu;
           functions::run_online_apport(pi,test,&fout_com,&mu);
 	  Pi::delete_bf();   
 	     
-          //cout<<"end online appROT pi"<<endl;
           start=functions::get_duration(start,fout);
 
+	      
+	      
           //--step 8-- compute codewords
-          //cout<<"re_randomize"<<endl;
 	  //setting Y and creating randomizeD gbf
           GBF1=functions::re_randomization(items, Y, items_size , Nbf, bytes ,  h_kokhav , crypt, pi, GBF1, test);
 
           start=functions::get_duration(start,fout);
 
+	      
+	      
 	  //--step 11-- comulative gbfs
           //sending the GBF to P0
-          //cout<<"comulative_gbf_pi"<<endl;
 	  functions::comulative_gbf_pi(pi,Nbf,GBF1,&fout_com);
 	      
           start=functions::get_duration(start,fout);
           fout<<endl;
           fout.close();
-          //delete crypt;  
-	  //cout<<"exit"<<endl;
- 
 
      }
 
