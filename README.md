@@ -10,11 +10,11 @@
 2) Run the command `sudo bash install.sh`
 
 3) After the installation, a folder named **libOTe** should be created.
-   <br>Run the command `cp -r simple/* libOTe/`
+   <br>Run the command `sudo cp -r simple/* libOTe/`
  
 4) Go to the **libOTe** folder, by using the command `cd libOTe`
 
-5) clone the **google test** library, by running the command `git clone https://github.com/google/googletest.git`
+5) clone the **google test** library, by running the command `sudo git clone https://github.com/google/googletest.git`
 
 6) Run the command `make`. A file named **bin/main** will be created.
 
