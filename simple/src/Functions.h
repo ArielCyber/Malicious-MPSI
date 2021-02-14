@@ -55,7 +55,6 @@ public:
 
 class Gbf_seg;
 
-
 struct sender{
    int sock; 
    int connect_sock; 
@@ -97,13 +96,10 @@ class synchGBF{
 
     block* GBF;   
 
-    synchGBF(int Nbf,int chunks,int segments):GBF_length(Nbf),segments(segments){//256
+    synchGBF(int Nbf,int chunks,int segments):GBF_length(Nbf),segments(segments){
         chunk_size=ceil(Nbf/segments);
-        //std::cout<<"Chunk size ="<<chunk_size<<endl;
         GBF=new block[GBF_length];
-        //std::cout<<"GBF_length= "<<GBF_length<<std::endl;
         num_of_chunks=segments;
-        //std::cout<<"num_of_chunks= "<<num_of_chunks<<std::endl;
         mtxArr_length= num_of_chunks;
         last_chunk=num_of_chunks-1;
         lastChunkStart=(num_of_chunks-1)*chunk_size;
@@ -114,12 +110,9 @@ class synchGBF{
         return segments;
     }
 
-    synchGBF(int Nbf,int chunks):GBF_length(Nbf),chunk_size(chunks){//256
-        //std::cout<<"Chunk size ="<<chunk_size<<endl;
+    synchGBF(int Nbf,int chunks):GBF_length(Nbf),chunk_size(chunks){
         GBF=new block[GBF_length];
-        //std::cout<<"GBF_length= "<<GBF_length<<std::endl;
         num_of_chunks=GBF_length/chunk_size+1;
-        //std::cout<<"num_of_chunks= "<<num_of_chunks<<std::endl;
         mtxArr_length= num_of_chunks;
         last_chunk=num_of_chunks-1;
         lastChunkStart=(num_of_chunks-1)*chunk_size;
@@ -133,7 +126,6 @@ class synchGBF{
 
     void XORsimple(block* toXOR)
     {
-        //std::cout<<"XOR simple"<<std::endl;
         for (int chunk_num=0;chunk_num<num_of_chunks-1;chunk_num++)
         {
             mtxArr[chunk_num].lock();
@@ -142,7 +134,7 @@ class synchGBF{
             }
             mtxArr[chunk_num].unlock();
         }
-        //int lastChunkStart=(num_of_chunks-1)*chunk_size;
+
         if (lastChunkStart<GBF_length)
         {
             mtxArr[last_chunk].lock();
@@ -151,87 +143,61 @@ class synchGBF{
             }
             mtxArr[last_chunk].unlock();
         }
-        //std::cout<<"end XOR simple"<<std::endl;
+
 
     }
 
-/*    void xor(block* toXOR,int begin,int end,int seg){
-        turn[seg].lock();
-        int i=0;
-        for (int j=begin;j<end;j++){ 
-            GBF[j]=GBF[j]^toXOR[i++];
-        }
-        turn[seg].unlock(); 
-    }  
-
-    void set_chunk_num(int n){
-        turn=new std::mutex[segments];  
-    }*/
 
     void XORchunk(block* toXOR, int chunk_num)
     {
-        //std::cout<<"XOR chunk: "<<chunk_num<<std::endl;
         mtxArr[chunk_num].lock();
         for (int j=0;j<chunk_size;j++){
          GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^toXOR[j];
         }
         mtxArr[chunk_num].unlock();
-        //xor(toXOR,(chunk_num*chunk_size),(chunk_num*chunk_size+chunk_size),chunk_num));
     }
 
     void XORchunk_limited(block* toXOR, int chunk_num, int limit)
     {
-        //std::cout<<"XOR last chunk: "<<chunk_num<<std::endl;
         mtxArr[chunk_num].lock();
         for (int j=0;j<limit;j++){
          GBF[(chunk_num)*chunk_size+j]=GBF[(chunk_num)*chunk_size+j]^toXOR[j];
         }
         mtxArr[chunk_num].unlock();
-        //xor(toXOR,(chunk_num*chunk_size),(chunk_num*chunk_size+limit),segment)); 
     }
 
     void XORordered(std::vector<block>* toXOR, int* order)
     {
-        //std::cout<<"XOR ordered"<<std::endl;
         for (int chunk_num=0;chunk_num<num_of_chunks-1;chunk_num++)
         {
             mtxArr[chunk_num].lock();
             for (int j=0;j<chunk_size;j++){
-                //GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^toXOR[chunk_num*chunk_size+j];
                 GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^(*toXOR)[order[chunk_num*chunk_size+j]];
             }
             mtxArr[chunk_num].unlock();
         }
         
-        //std::cout<<"lastChunkStart= "<<lastChunkStart<<std::endl;
         if (lastChunkStart<GBF_length)
         {
             mtxArr[last_chunk].lock();
             for (int j=lastChunkStart;j<GBF_length;j++){
-                //std::cout<<"j is equal to "<<j<<std::endl;
                 GBF[j]=GBF[j]^(*toXOR)[order[j]];
             }
             mtxArr[last_chunk].unlock();
         }
-        //std::cout<<"end XOR ordered"<<std::endl;
-        //for (int i=0;i<GBF_length;i++){
-        // GBF[i]=GBF[i]^(*toXOR)[order[i]][BF->get_bit(i)];
-        //}
     }
 
     void XORorderedBF(std::vector<std::array<block, 2>>* toXOR, int* order, Bitstring* BF)
     {
-        //std::cout<<"XOR ordered with BF"<<std::endl;
         for (int chunk_num=0;chunk_num<num_of_chunks-1;chunk_num++)
         {
             mtxArr[chunk_num].lock();
             for (int j=0;j<chunk_size;j++){
-                //GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^toXOR[chunk_num*chunk_size+j];
                 GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^(*toXOR)[order[chunk_num*chunk_size+j]][BF->get_bit(chunk_num*chunk_size+j)];
             }
             mtxArr[chunk_num].unlock();
         }
-        //int lastChunkStart=(num_of_chunks-1)*chunk_size;
+
         if (lastChunkStart<GBF_length)
         {
             mtxArr[last_chunk].lock();
@@ -240,16 +206,11 @@ class synchGBF{
             }
             mtxArr[last_chunk].unlock();
         }
-        //std::cout<<"end XOR ordered with BF"<<std::endl;
-        //for (int i=0;i<GBF_length;i++){
-        // GBF[i]=GBF[i]^(*toXOR)[order[i]][BF->get_bit(i)];
-        //}
     }
     
     ~synchGBF(){
         delete[] GBF;
         delete[] mtxArr;
-        //delete[] turn;
         }
     
 };
@@ -315,6 +276,7 @@ namespace functions{
 
     void arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_indexes,int* current_indexes,vector<int>* one_indexes,vector<int>* zero_indexes,int flag_starting_from,int* place_0,int* place_1);
     void arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes);
+    void get_zeros_ones(BitVector* b, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt);
     void get_sub_group(int* ,int,int,block&);
     void compute_r(block& r,std::vector<std::array<block, 2>>& strings,int* indexes,int indexes_size); 
     void compute_R_r( int* sub_group,int* indexes,BitVector* b,int Ncc,int Not, std::vector<block>& strings, block& r, std::vector <int> &R);
@@ -322,8 +284,6 @@ namespace functions{
     unsigned int* get_seeds(int seeds_num, block seed);	
     block* re_randomization(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* r);
     block* re_randomization_zero(vector <int>& items, block* Y, int n , int Nbf, int bytes , set<int>* h_kokhav ,crypto* crypt, Pi* pi, block* GBF, synchGBF* test);
-    block* check_the_item(set<int>& h_kokhav,block* GBF);
-
 
     void offline_apport_receiver(Party* party,std::vector<std::string>* ips, int** ports,int player, int other_player,fstream* fout,std::mutex* mu);
     void offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu);
@@ -337,16 +297,18 @@ namespace functions{
     void read_protocol_parameters(const char* cfg_file,uint32_t* seeds,uint32_t* Nbf,uint64_t* Not,uint32_t* numOFOnes,uint32_t* Nc,uint32_t* Nr,string& data,string& ip);
     void get_values(string values_file,vector <int>& values);
 	
+    void seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed,int player,fstream* fout);  
     void seeds_pi_write(Pi* pi,Commit* commit,block* seed,int party,unsigned long* data,std::mutex* mu);
     void seeds_pi_read(Pi* pi,Commit* commit,block* seed,int party,unsigned long* data,std::mutex* mu);
 
-    void seeds_agreement_pi(Pi* pi,int parties,Commit& commit,block& seed,int player,fstream* fout);  
+    void seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& seed,fstream* fout);
     void seeds_p0_write(P0* p0,Commit* commit,block* seed,unsigned long* sum,std::mutex* mu);
     void seeds_p0_read(P0* p0,Commit* commit,block* seed,unsigned long* sum,std::mutex* mu);
-    void seeds_agreement_p0(std::vector<P0*>& P0_s,Commit& commit,block& seed,fstream* fout);
 
     void set_seed_commit(Commit& commit, block& seed,crypto* crypt);
-	
+
+    void secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout);
+    void secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv);
     void secret_write(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu);
     void secret_read(Pi* pi,int other_player,block* keys,unsigned long* sum,std::mutex* mu);
 
@@ -358,16 +320,11 @@ namespace functions{
 	
     void get_intersection( std::set<int>* h_kokhav,block* GBF);
     block* get_Y(int items_size,Pi* pi,std::set<int>* h_kokhav, block* Y, synchGBF* test);
-    void comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout);
-
-    void get_zeros_ones(BitVector* b, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt);
+    block* check_the_item(set<int>& h_kokhav,block* GBF);
 	
-    block* compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);  
-	
+    block* compute_gbf(std::vector<P0*>& P0_s,int Nbf, synchGBF* test,fstream* fout);  	
     void get_gbf(P0* p0, synchGBF* test,unsigned long* data,int player);
-	
-    void secret_sharing_seed_pi(Pi* pi,int parties,crypto* crypt,int player,block* keys,block* keys_recv,fstream* fout);
-    void secret_sharing_aes(int parties,uint32_t Nbf,synchGBF* test,block* keys,block* keys_recv);
+    void comulative_gbf_pi(Pi* pi,int Nbf,block* GBF1,fstream* fout);
  	
     void creating_p0_instance(int party,int port,std::vector<P0*>* P0_s,uint32_t numOfOnes,uint32_t m_nSecParam, uint8_t* constSeed );
 
