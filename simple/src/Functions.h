@@ -74,7 +74,6 @@ typedef unsigned char BYTE;
 typedef unsigned int uint;
 
 #include "Bitstring.h"
-#include "MurmurHash.h"
 
 class Party;
 class P0;
