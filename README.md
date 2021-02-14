@@ -16,7 +16,7 @@
 
 5) clone the **google test** library, by running the command `sudo git clone https://github.com/google/googletest.git`
 
-6) Run the command `make`. A file named **bin/main** will be created.
+6) Run the command `sudo make`. A file named **bin/main** will be created.
 
 7) Change the ips in the file **ip.txt** to the parties' ips.
    <br> Each party will get a number in range [0..(parties-1)], accordingly to the order in the file.
