@@ -7,9 +7,9 @@ file(GLOB_RECURSE SRCS *.cpp)
 include_directories(${CMAKE_SOURCE_DIR})
 
 
-add_executable(tests tests.cpp)
+add_executable(Functions_test Functions_test.cpp)
 
-target_link_libraries(tests gtest_main libOTe_Tests tests_cryptoTools ENCRYPTO_utils::encrypto_utils project_)
+target_link_libraries(Functions_test gtest_main libOTe_Tests tests_cryptoTools ENCRYPTO_utils::encrypto_utils project_)
 
 add_executable(main main.cpp)
 
