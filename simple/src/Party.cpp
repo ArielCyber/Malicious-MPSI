@@ -79,6 +79,10 @@ int Party::getNot() const{
 	return Not;
 }
 
+int Party::getNbf() const{
+	return Nbf;
+}
+
 int Party::getSeedsNum() const{
     return seeds_num;
 }
