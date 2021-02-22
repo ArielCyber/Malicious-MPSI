@@ -66,13 +66,13 @@ BitVector* Party::getChoices() const{
     return bitvector;
 }
 
-std::vector<block>& Party::getStringsReceiver(){
-    return *strings_choices;
+std::vector<block>* Party::getStringsReceiver(){
+    return strings_choices;
 }
 
-std::vector<std::array<block, 2>>& Party::getStrings(){
+std::vector<std::array<block, 2>>* Party::getStrings(){
     //cout<<"strings:"<<strings->size();
-    return *strings;
+    return strings;
 }
 
 int Party::getNot() const{
