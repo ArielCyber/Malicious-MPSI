@@ -61,6 +61,8 @@ public:
        BitVector* getChoices() const;
        std::vector<block>& getStringsReceiver();
        std::vector<std::array<block, 2>>& getStrings();
+       int* getFuncReceiver();
+       int* getFuncSender();	
 
        //openning sockets with the other players
        static void init_sender(struct sender* s, int port);
