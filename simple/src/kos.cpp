@@ -25,9 +25,6 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 	//auto s = timer.setTimePoint("start");
 	//sendTimer.setTimePoint("start");
 	//recvTimer.setTimePoint("start");
-        auto start = std::chrono::steady_clock::now();
-    
-
 
 	std::vector<KosOtExtSender> senders(numThreads);
 	std::vector<KosOtExtReceiver> receivers(numThreads);
@@ -152,13 +149,9 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 	for (int i = 0; i < numThreads; ++i)
 		thrds[i].join();
 
-    cout<<"End-OT??"<<endl;
 
 	//auto e = timer.setTimePoint("finish");
-	//auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(e - s).count();
-
-    auto end = std::chrono::steady_clock::now();
-    std::cout<<"OT time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<std::endl;	
+	//auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(e - s).count();	
 	
 
 	//auto com = (chls[0].getTotalDataRecv() + chls[0].getTotalDataSent()) * numThreads;
