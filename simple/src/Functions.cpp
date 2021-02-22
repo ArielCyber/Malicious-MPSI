@@ -52,7 +52,7 @@ void shuffling(vector<int>* arr_indexes,unsigned int* rand){
  * @param crypt crypthographic var 
 */
 
-void functions::get_zeros_ones(BitVector* bitvector, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt,int*& new_indexes){
+void functions::get_zeros_ones(BitVector* bitvector, int Not, int Nc,int Nbf, vector<int>*& arr_indexes,crypto *crypt,int*& new_indexes){
 
      //establishing 2 vectors of the 0's/1's indexes	
      arr_indexes=new vector<int>[2];
@@ -148,7 +148,7 @@ void functions::arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_inde
  * @param indexes Array of the indexes of the strings
  */
 	
-void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt,int* new_indexes){
+void functions::functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt,int* new_indexes){
  
     //the starting place for going over the vectors
     int place_0_begin=0;
@@ -157,8 +157,8 @@ void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr
     int place_1_end=arr_indexes[1].size()-1;
 
     //building shuffled vectors of 0's and 1's inedexes
-    thread* t1=new thread(functions::arrange_indexes_thread,&BF,Nbf,indexes1,*indexes,&arr_indexes[1],&arr_indexes[0],0,&place_0_begin,&place_1_begin);
-    thread* t2=new thread(functions::arrange_indexes_thread,&BF,Nbf,indexes1,*indexes,&arr_indexes[1],&arr_indexes[0],1,&place_0_end,&place_1_end);
+    thread* t1=new thread(functions::arrange_indexes_thread,&BF,Nbf,new_indexes,*indexes,&arr_indexes[1],&arr_indexes[0],0,&place_0_begin,&place_1_begin);
+    thread* t2=new thread(functions::arrange_indexes_thread,&BF,Nbf,new_indexes,*indexes,&arr_indexes[1],&arr_indexes[0],1,&place_0_end,&place_1_end);
 
     t1->join();
     t2->join();
@@ -174,7 +174,7 @@ void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr
     delete [] arr_indexes;	
     delete [] (*indexes);	
 
-    (*indexes)=indexes1;	
+    (*indexes)=new_indexes;	
 
     //cout<<"arrange_the_indexes complete!"<<endl;
 }
