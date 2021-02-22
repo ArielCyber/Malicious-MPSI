@@ -25,7 +25,7 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 	//auto s = timer.setTimePoint("start");
 	//sendTimer.setTimePoint("start");
 	//recvTimer.setTimePoint("start");
-        //auto start = std::chrono::steady_clock::now();
+    auto start = std::chrono::steady_clock::now();
     
 
 
@@ -36,7 +36,7 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 
 #ifdef LIBOTE_HAS_BASE_OT
     //!!!!!
-        //cout<<"LIBOTE_HAS_BASE_OT"<<endl;
+    cout<<"LIBOTE_HAS_BASE_OT"<<endl;
 	// Now compute the base OTs, we need to set them on the first pair of extenders.
 	// In real code you would only have a sender or reciever, not both. But we do 
 	// here just showing the example. 
@@ -61,7 +61,7 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 	}
 #else
     //!!!!!
-    //cout<<"LIBOTE_HAS_BASE_OT is false"<<endl;
+    cout<<"LIBOTE_HAS_BASE_OT is false"<<endl;
 #endif 
 
 	// for the rest of the extenders, call split. This securely 
@@ -84,10 +84,10 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 
 		if (role == Role::Receiver)
 		{
-                //cout<<"Number of OTs"<<numOTs<<endl;
+            //cout<<"Number of OTs"<<numOTs<<endl;
 			BitVector& choice=*(player->getChoices());
-			auto& msgs=player->getStringsReceiver();
-                        try { /*cout<<choice.size()<<" "<<msgs.size()<<endl;*/ } catch (const std::exception& e) { cout<<"exception"; }
+			auto& msgs=*(player->getStringsReceiver());
+                        try { cout<<choice.size()<<" "<<msgs.size()<<endl; } catch (const std::exception& e) { cout<<"exception"; }
 			// construct the choices that we want.
 			// in this case pick random messages.
 			//choice.randomize(prng);
@@ -95,21 +95,21 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 			// construct a vector to stored the received messages. 
 			if (randomOT)
 			{
-                                // cout<<"OT receive"<<endl;
+                cout<<"OT receive"<<endl;
 				// perform  numOTs random OTs, the results will be written to msgs.
-                                try{ /*cout<<"choice masg"<<choice.size()<<" "<<msgs.size()<<" "<<chls[i]<<endl;*/}catch (const std::exception& e) { cout<<"exception"; }      
-				receivers[i].receive(choice, msgs, prng, chls[i]);
+                               try{ cout<<"choice masg"<<choice.size()<<" "<<msgs.size()<<" "<<chls[i]<<endl;}catch (const std::exception& e) { cout<<"exception"; }      
+                                 receivers[i].receive(choice, msgs, prng, chls[i]);			
 			}
 			else
 			{
-                                //cout<<choice.size()<<" "<<msgs.size()<<endl; 
+                                cout<<choice.size()<<" "<<msgs.size()<<endl; 
 				// perform  numOTs chosen message OTs, the results will be written to msgs.
 			//	receivers[i].receiveChosen(choice, msgs, prng, chls[i]);
 			}
-		 	//std::cout<<choice[0]<<": "<<msgs[0]<<std::endl;
-			//std::cout<<choice[1]<<": "<<msgs[1]<<std::endl;
-			//std::cout<<choice[2]<<": "<<msgs[2]<<std::endl;
-			//std::cout<<choice[3]<<": "<<msgs[3]<<std::endl;
+		 	std::cout<<choice[0]<<": "<<msgs[0]<<std::endl;
+			std::cout<<choice[1]<<": "<<msgs[1]<<std::endl;
+			std::cout<<choice[2]<<": "<<msgs[2]<<std::endl;
+			std::cout<<choice[3]<<": "<<msgs[3]<<std::endl;
 			
 		}
 		else
@@ -122,14 +122,14 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 			//
 			//     senders[i].setDelta(some 128 bit delta);
 			//
-                        auto& msgs=player->getStrings();
+                        auto& msgs=*(player->getStrings());
                               
 			if (randomOT)
 			{
-				//cout<<"OT send1"<<endl;
+				cout<<"OT send1"<<endl;
 				// perform the OTs and write the random OTs to msgs.
-                                try{/* cout<<"msgs"<<msgs.size()<<" "<<chls[i]<<endl;*/}catch (const std::exception& e) { cout<<"exception"; }
-				senders[i].send(msgs, prng, chls[i]);
+                                        try{ cout<<"msgs"<<msgs.size()<<" "<<chls[i]<<endl;}catch (const std::exception& e) { cout<<"exception"; }
+                                senders[i].send(msgs, prng, chls[i]);				
 			}
 			else
 			{
@@ -171,13 +171,13 @@ void TwoChooseOne(Role role, int numThreads, std::string ip,Party* player)
 	for (int i = 0; i < numThreads; ++i)
 		thrds[i].join();
 
-        //cout<<"End-OT??"<<endl;
+    cout<<"End-OT??"<<endl;
 
 	//auto e = timer.setTimePoint("finish");
 	//auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(e - s).count();
 
-        //auto end = std::chrono::steady_clock::now();
-        //std::cout<<"OT time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<std::endl;	
+    auto end = std::chrono::steady_clock::now();
+    std::cout<<"OT time = "<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<std::endl;	
 	
 
 	//auto com = (chls[0].getTotalDataRecv() + chls[0].getTotalDataSent()) * numThreads;
