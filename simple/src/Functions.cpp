@@ -148,7 +148,7 @@ void functions::arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_inde
  * @param indexes Array of the indexes of the strings
  */
 	
-void functions::functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt,int* new_indexes){
+void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt,int* new_indexes){
  
     //the starting place for going over the vectors
     int place_0_begin=0;
