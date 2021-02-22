@@ -218,9 +218,23 @@ int main(int argc, char** argv)
 		
           //as a receiver-
           //creating function according to the BF bits and sending it to the other party
+		
+          std::mutex** turn=new std::mutex*[4];
+          semaphore** sem=new semaphore*[4];    
+          std::queue<Gbf_seg*>** q=new queue<Gbf_seg*>*[4];       
 
+          for (int i=0;i<4;i++){
+                turn[i]=new mutex;
+                sem[i]=new semaphore;
+                q[i]=new queue<Gbf_seg*>;
+          }
+			
 	  for (int i=0;i<(parties-1);i++){
-                threads.push_back(new thread(functions::run_online_apport,P0_s[i],test,&fout_com,&mu));
+                threads.push_back(new thread(functions::run_online_apport,P0_s[i],test,&fout_com,&mu,i,(parties-1)*2,turn,sem,q));
+	  }
+		
+	  for (int i=0;i<4;i++){
+                threads.push_back(new thread(functions::run_xoring,q,sem,turn,i,(parties-1)*2));
 	  }
 
           for (auto& t:threads) t->join();
@@ -228,10 +242,21 @@ int main(int argc, char** argv)
 	  threads.clear();
 
           //freeing memory
+			
+	  for (int i=0;i<4;i++){
+                delete turn[i];
+                delete sem[i];
+                delete q[i];
+          }
+			
+	  delete [] turn;
+	  delete [] sem;
+	  delete [] q;
+			
+          for (int i=0;i<(parties-1);i++) P0_s[i]->delete_rbf_func();
           P0::delete_bf();
 
           start=functions::get_duration(start,fout);
-		
 		
 		
 	  //--step 11-- comulative gbfs
@@ -345,28 +370,62 @@ int main(int argc, char** argv)
 	      
           //--step 7+10-- online apport
           std::mutex mu;
-          functions::run_online_apport(pi,test,&fout_com,&mu);
-	  Pi::delete_bf();   
+			 
+          std::mutex** turn=new std::mutex*[4];
+          semaphore** sem=new semaphore*[4];    
+          std::queue<Gbf_seg*>** q=new queue<Gbf_seg*>*[4];       
+
+          for (int i=0;i<4;i++){
+                turn[i]=new mutex;
+                sem[i]=new semaphore;
+                q[i]=new queue<Gbf_seg*>;
+          }
+	
+	  std::vector<std::thread*> threads;
+						
+	  threads.push_back(new thread(functions::run_online_apport,pi,test,&fout_com,&mu,0,2,turn,sem,q));
+	  for (int i=0;i<4;i++){
+                threads.push_back(new thread(functions::run_xoring,q,sem,turn,i,2));
+	  }
+           
+	  for (auto& t:threads) t->join();
+	  for (auto& t:threads) delete t;
+	  threads.clear();
+
+	  //freeing memory
+			
+	  for (int i=0;i<4;i++){
+                delete turn[i];
+                delete sem[i];
+                delete q[i];
+           }
+			
+	   delete [] turn;
+	   delete [] sem;
+	   delete [] q;
+           
+	   pi->delete_rbf_func();
+           Pi::delete_bf();   
 	     
-          start=functions::get_duration(start,fout);
+           start=functions::get_duration(start,fout);
 
 	      
 	      
-          //--step 8-- compute codewords
-	  //setting Y and creating randomizeD gbf
-          GBF1=functions::re_randomization(items, Y, items_size , Nbf, bytes ,  h_kokhav , crypt, pi, GBF1, test);
+           //--step 8-- compute codewords
+	   //setting Y and creating randomizeD gbf
+           GBF1=functions::re_randomization(items, Y, items_size , Nbf, bytes ,  h_kokhav , crypt, pi, GBF1, test);
 
-          start=functions::get_duration(start,fout);
+           start=functions::get_duration(start,fout);
 
 	      
 	      
-	  //--step 11-- comulative gbfs
-          //sending the GBF to P0
-	  functions::comulative_gbf_pi(pi,Nbf,GBF1,&fout_com);
+	   //--step 11-- comulative gbfs
+           //sending the GBF to P0
+	   functions::comulative_gbf_pi(pi,Nbf,GBF1,&fout_com);
 	      
-          start=functions::get_duration(start,fout);
-          fout<<endl;
-          fout.close();
+           start=functions::get_duration(start,fout);
+           fout<<endl;
+           fout.close();
 
      }
 
