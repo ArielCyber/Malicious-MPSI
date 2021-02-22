@@ -780,7 +780,7 @@ void functions::online_apport_receiver(Party* party, synchGBF* test, fstream* fo
  * @param Party pointer to the party object
 **/
 
-void functions::online_apport_sender(Party* party, synchGBF* test,fstream* fout,std::mutex* mu){
+void functions::online_apport_sender(Party* party, synchGBF* test,fstream* fout,std::mutex* mu,int first_segment,int num_of_segments,std::mutex** turn,semaphore** sem,std::queue<Gbf_seg*>** q){
 	
     //party receives the injective func and buildin
     party->recv_func();
