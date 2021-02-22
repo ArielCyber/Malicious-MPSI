@@ -128,8 +128,10 @@ class synchGBF{
         for (int chunk_num=0;chunk_num<num_of_chunks-1;chunk_num++)
         {
             mtxArr[chunk_num].lock();
-            for (int j=0;j<chunk_size;j++){
-                GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^toXOR[chunk_num*chunk_size+j];
+            int start=chunk_num*chunk_size;
+	    int end=(chunk_num+1)*chunk_size
+            for (int j=start;j<end;j++){
+                GBF[j]=GBF[j]^toXOR[j];
             }
             mtxArr[chunk_num].unlock();
         }
@@ -150,8 +152,10 @@ class synchGBF{
     void XORchunk(block* toXOR, int chunk_num)
     {
         mtxArr[chunk_num].lock();
+	int start=chunk_num*chunk_size;
         for (int j=0;j<chunk_size;j++){
-         GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^toXOR[j];
+	     int index=start+j;
+             GBF[index]=GBF[index]^toXOR[j];
         }
         mtxArr[chunk_num].unlock();
     }
@@ -159,8 +163,10 @@ class synchGBF{
     void XORchunk_limited(block* toXOR, int chunk_num, int limit)
     {
         mtxArr[chunk_num].lock();
+	int start=chunk_num*chunk_size;
         for (int j=0;j<limit;j++){
-         GBF[(chunk_num)*chunk_size+j]=GBF[(chunk_num)*chunk_size+j]^toXOR[j];
+	     int index=start+j;		
+             GBF[index]=GBF[index]^toXOR[j];
         }
         mtxArr[chunk_num].unlock();
     }
@@ -170,8 +176,10 @@ class synchGBF{
         for (int chunk_num=0;chunk_num<num_of_chunks-1;chunk_num++)
         {
             mtxArr[chunk_num].lock();
-            for (int j=0;j<chunk_size;j++){
-                GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^(*toXOR)[order[chunk_num*chunk_size+j]];
+	    int start=chunk_num*chunk_size;
+	    int end=(1+chunk_num)*chunk_size;
+            for (int j=start;j<end;j++){
+                GBF[j]=GBF[j]^(*toXOR)[order[j]];
             }
             mtxArr[chunk_num].unlock();
         }
@@ -191,8 +199,10 @@ class synchGBF{
         for (int chunk_num=0;chunk_num<num_of_chunks-1;chunk_num++)
         {
             mtxArr[chunk_num].lock();
-            for (int j=0;j<chunk_size;j++){
-                GBF[chunk_num*chunk_size+j]=GBF[chunk_num*chunk_size+j]^(*toXOR)[order[chunk_num*chunk_size+j]][BF->get_bit(chunk_num*chunk_size+j)];
+            int start=chunk_num*chunk_size;
+	    int end=(chunk_num+1)*chunk_size;
+            for (int j=start;j<end;j++){
+                GBF[j]=GBF[j]^(*toXOR)[order[j]][BF->get_bit(j)];
             }
             mtxArr[chunk_num].unlock();
         }
@@ -214,20 +224,33 @@ class synchGBF{
     
 };
 
-
 class Gbf_seg{
 public:
-      block* chunkArr;
       int start;
-      int size;
-      synchGBF* test;
+      int end;
+      synchGBF* GBF;
+	  int type;
 
-      Gbf_seg(block* chunkArr,int start,int size,synchGBF* test):
-             chunkArr(chunkArr),start(start),size(size),test(test){}
+      Gbf_seg(int start,int end,synchGBF* test,int type):
+             start(start),end(end),GBF(test),type(type){}
 
-       ~Gbf_seg(){
-           delete [] chunkArr;
-       }
+};
+
+class Gbf_seg_recv:public Gbf_seg{
+public:
+      std::vector<block>* toXOR;
+	  int* order;
+      Gbf_seg_recv(std::vector<block>* toXOR, int* order,int start,int size,synchGBF* test,int type):Gbf_seg(start,size,test,type),toXOR(toXOR),order(order){}
+
+};
+
+class Gbf_seg_sender:public Gbf_seg{
+public:
+      std::vector<std::array<block, 2>>* toXOR; 
+      Bitstring* BF;
+	  	  int* order;
+      Gbf_seg_sender(std::vector<std::array<block, 2>>* toXOR, Bitstring* BF,int* order,int start,int size,synchGBF* test,int type):Gbf_seg(start,size,test,type),toXOR(toXOR),BF(BF),order(order){}
+
 };
       
 class Lock{
