@@ -55,6 +55,7 @@ public:
 
        //getters
        int getNot() const;
+       int getNbf() const;
        int getSeedsNum() const;
        crypto* getCrypto(); 
        BitVector* getChoices() const;
