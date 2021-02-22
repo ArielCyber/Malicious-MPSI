@@ -310,7 +310,7 @@ namespace functions{
     void offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu);
     void online_apport_sender(Party* party, synchGBF* test,fstream* fout,std::mutex* mu,int first_segment,int num_of_segments,std::mutex** turn,semaphore** sem,std::queue<Gbf_seg*>** q);
     void online_apport_receiver(Party* party, synchGBF* test, fstream* fout,std::mutex* mu,int first_segment,int num_of_segments,std::mutex** turn,semaphore** sem,std::queue<Gbf_seg*>** q);
-    void run_online_apport(Party* p0, synchGBF* test,fstream* fout,std::mutex* mu );
+    void run_online_apport(Party* p0, synchGBF* test,fstream* fout,std::mutex* mu ,int first_segment,int num_of_segments,std::mutex** turn,semaphore** sem,std::queue<Gbf_seg*>** q);
     void run_offline_apport(Party* p0,std::vector <std::string>* ips,int** ports,int player,int other_player,fstream* fout,std::mutex* mu) ;
     void run_xoring(std::queue<Gbf_seg*>** q,semaphore** sem,mutex** turn,int i,int num);
 
