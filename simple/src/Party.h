@@ -63,7 +63,8 @@ public:
        std::vector<std::array<block, 2>>* getStrings();
        int* getFuncReceiver();
        int* getFuncSender();	
-
+       Bitstring* getBF();
+	
        //openning sockets with the other players
        static void init_sender(struct sender* s, int port);
        static void init_receiver(struct receiver* recv,const char* ip,int port);
