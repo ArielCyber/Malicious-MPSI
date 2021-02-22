@@ -712,7 +712,7 @@ void functions::offline_apport_receiver(Party* party,std::vector<std::string>* i
  * @param crypt_ parameter for the OT protocol
 **/
 
-void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu){
+void functions::online_apport_sender(Party* party, synchGBF* test,fstream* fout,std::mutex* mu,int first_segment,int num_of_segments,std::mutex** turn,semaphore** sem,std::queue<Gbf_seg*>** q){
 
     string str1=(*ips)[player];
 
@@ -749,7 +749,7 @@ void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips
  * @param Party pointer to the party object
 **/
 
-void functions::online_apport_receiver(Party* party, synchGBF* test, fstream* fout,std::mutex* mu){
+void functions::online_apport_receiver(Party* party, synchGBF* test, fstream* fout,std::mutex* mu,int first_segment,int num_of_segments,std::mutex** turn,semaphore** sem,std::queue<Gbf_seg*>** q){
 
     //party arranging the indexes of the initial bitstring accordingly to the bloom filter bits
     party->arrange_the_indexes();
