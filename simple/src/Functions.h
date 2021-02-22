@@ -295,7 +295,7 @@ public:
 
 
 namespace functions{
-
+    void arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt,int* new_indexes);
     void arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_indexes,int* current_indexes,vector<int>* one_indexes,vector<int>* zero_indexes,int flag_starting_from,int* place_0,int* place_1);    void arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes);
     void get_zeros_ones(BitVector* bitvector, int Not, int Nc,int Nbf, vector<int>*& arr_indexes,crypto *crypt,int*& new_indexes);
     void get_sub_group(int* ,int,int,block&);
