@@ -129,7 +129,7 @@ class synchGBF{
         {
             mtxArr[chunk_num].lock();
             int start=chunk_num*chunk_size;
-	    int end=(chunk_num+1)*chunk_size
+	    int end=(chunk_num+1)*chunk_size;
             for (int j=start;j<end;j++){
                 GBF[j]=GBF[j]^toXOR[j];
             }
