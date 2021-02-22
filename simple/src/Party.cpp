@@ -76,15 +76,23 @@ std::vector<std::array<block, 2>>& Party::getStrings(){
 }
 
 int Party::getNot() const{
-	return Not;
+    return Not;
 }
 
 int Party::getNbf() const{
-	return Nbf;
+    return Nbf;
 }
 
 int Party::getSeedsNum() const{
     return seeds_num;
+}
+
+int* getFuncReceiver(){
+     return func_recv;
+}
+
+int* getFuncSender(){
+     return func_sender;
 }
 
 
