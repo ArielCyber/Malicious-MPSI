@@ -352,7 +352,7 @@ void Party::create_BF_threads(std::set<int>* h_kokhav,unsigned int* hash_seeds, 
 **/
 
 void Party::get_zeros_ones(){
-     functions::get_zeros_ones(bitvector, Not, Nc_recv, arr_indexes,crypt);
+     functions::get_zeros_ones(bitvector, Not, Nc_recv,Nbf, arr_indexes,crypt,new_indexes);
 }
 
 
@@ -361,7 +361,7 @@ void Party::get_zeros_ones(){
 **/
 
 void Party::arrange_the_indexes(){
-   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv);
+   functions::arrange_the_indexes(*BF,Nbf,arr_indexes,&func_recv,Not,Nc_recv,crypt,new_indexes);
 }
 
 
