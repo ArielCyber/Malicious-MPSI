@@ -712,7 +712,7 @@ void functions::offline_apport_receiver(Party* party,std::vector<std::string>* i
  * @param crypt_ parameter for the OT protocol
 **/
 
-void functions::online_apport_sender(Party* party, synchGBF* test,fstream* fout,std::mutex* mu,int first_segment,int num_of_segments,std::mutex** turn,semaphore** sem,std::queue<Gbf_seg*>** q){
+void functions::offline_apport_sender(Party* party,std::vector<std::string>* ips, int** ports,int player,int other_player, fstream* fout,std::mutex* mu){
 
     string str1=(*ips)[player];
 
