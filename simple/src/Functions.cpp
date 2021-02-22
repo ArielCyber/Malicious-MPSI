@@ -848,9 +848,9 @@ void functions::run_xoring(std::queue<Gbf_seg*>** q,semaphore** sem,mutex** turn
 void functions::run_online_apport(Party* p0, synchGBF* test,fstream* fout,std::mutex* mu ){
 
     //online apport receiver
-    thread* t1=new thread(functions::online_apport_receiver,p0, test,fout,mu);
+    thread* t1=new thread(functions::online_apport_receiver,p0, test,fout,mu,(first_segment*2),num_of_segments,turn,sem,q);
     //online apport sender
-    thread* t2=new thread(functions::online_apport_sender,p0, test,fout,mu);	
+    thread* t2=new thread(functions::online_apport_sender,p0, test,fout,mu,((first_segment*2)+1),num_of_segments,turn,sem,q);	
 	
     t1->join();
     t2->join();
