@@ -59,8 +59,8 @@ public:
        int getSeedsNum() const;
        crypto* getCrypto(); 
        BitVector* getChoices() const;
-       std::vector<block>& getStringsReceiver();
-       std::vector<std::array<block, 2>>& getStrings();
+       std::vector<block>* getStringsReceiver();
+       std::vector<std::array<block, 2>>* getStrings();
        int* getFuncReceiver();
        int* getFuncSender();	
 
