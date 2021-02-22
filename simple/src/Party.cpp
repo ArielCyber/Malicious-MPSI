@@ -87,11 +87,11 @@ int Party::getSeedsNum() const{
     return seeds_num;
 }
 
-int* getFuncReceiver(){
+int* Party::getFuncReceiver(){
      return func_recv;
 }
 
-int* getFuncSender(){
+int* Party::getFuncSender(){
      return func_sender;
 }
 
