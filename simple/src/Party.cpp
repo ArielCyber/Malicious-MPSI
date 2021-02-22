@@ -95,6 +95,9 @@ int* Party::getFuncSender(){
      return func_sender;
 }
 
+Bitstring* Party::getBF(){
+     return BF;
+}
 
 //initialization of the sender
 void Party::init_sender( int port){
