@@ -27,6 +27,7 @@ protected:
        //play as a receiver
        struct receiver recv;
        int* func_recv;	
+       int* new_indexes;
        std::vector<block>* strings_choices;	
        block r_recv;	
        int Nc_recv;	  
