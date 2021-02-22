@@ -472,10 +472,17 @@ int Party::check_if_to_abort2(){
 }
 
 
-//deleting the bloom filter
+//freeing memory
 void Party::delete_bf(){
-     if (BF!=nullptr) delete BF;
+	if (BF!=nullptr) delete BF;
 }
+
+void Party::delete_rbf_func(){       
+	if (func_recv!=nullptr) delete [] func_recv; 
+	if (strings_choices!=nullptr) delete strings_choices;
+	if (func_sender!=nullptr) delete [] func_sender;
+	if (strings!=nullptr) delete strings;
+} 
 
 
 //d'tor
