@@ -759,7 +759,18 @@ void functions::online_apport_receiver(Party* party, synchGBF* test, fstream* fo
     party->send_func();
 
     //xoring the GBF
-    party->xor_RBF_receiver(test);
+    int Nbf=party-> getNbf();
+    int jump=Nbf/4;
+    for (int i=0;i<3;i++){
+	turn[i]->lock();
+        q[i]->push(new Gbf_seg_recv(party->getStringsReceiver(),party->getFuncReceiver(),i*jump,(i+1)*jump,test,0));
+	turn[i]->unlock();
+	sem[i]->notify();
+    }
+    turn[3]->lock();
+    q[3]->push(new Gbf_seg_recv(party->getStringsReceiver(),party->getFuncReceiver(),jump*3,Nbf,test,0));
+    turn[3]->unlock();
+    sem[3]->notify();
 }
 
 
@@ -776,9 +787,58 @@ void functions::online_apport_sender(Party* party, synchGBF* test,fstream* fout,
     party->recv_func();
 	
     //xoring the GBF
-    party->xor_RBF_sender(test);
+    int Nbf=party-> getNbf();
+    int jump=Nbf/4;
+    for (int i=0;i<3;i++){
+	turn[i]->lock();
+        q[i]->push(new Gbf_seg_sender(party->getStrings(),party->getBF(),party->getFuncSender(),i*jump,(i+1)*jump,test,1));
+	turn[i]->unlock();
+	sem[i]->notify();
+    }
+    turn[3]->lock();
+    q[3]->push(new Gbf_seg_sender(party->getStrings(),party->getBF(),party->getFuncSender(),jump*3,Nbf,test,1));
+    turn[3]->unlock();
+    sem[3]->notify();                                                                       
 }
 
+
+/**
+ * performing xor operations of specific section int the GBF,
+ * by getting queue with segments to xor
+ *
+ * @param q queue of the waiting segments to xor
+ * @param sem semaphore for notifying if there are waiting segments to xor
+ * @param i the segment to xor (0<=i<=3)
+ * @param num the maximum capacity of the queue
+**/
+
+void functions::run_xoring(std::queue<Gbf_seg*>** q,semaphore** sem,mutex** turn,int i,int num){
+	
+    int count=0;
+	
+    while (count<num){
+	    
+	sem[i]->wait();
+
+        if (q[i]->front()->type==0){
+	    Gbf_seg_recv* gbf=(Gbf_seg_recv*)(q[i]->front());
+	    for (int j=gbf->start;j<gbf->end;j++){
+	         gbf->GBF->GBF[j]=gbf->GBF->GBF[j]^(*(gbf->toXOR))[gbf->order[j]];
+            }
+	}
+	else{
+            Gbf_seg_sender* gbf=(Gbf_seg_sender*)(q[i]->front());
+	    for (int j=gbf->start;j<gbf->end;j++){
+		 gbf->GBF->GBF[j]=gbf->GBF->GBF[j]^(*(gbf->toXOR))[gbf->order[j]][gbf->BF->get_bit(j)];
+	    }
+        }
+
+        turn[i]->lock();  
+        q[i]->pop();  
+        turn[i]->unlock();     
+        count++;	
+    }
+}
 
 /**
  * running online apport as a sender and as a receiver
