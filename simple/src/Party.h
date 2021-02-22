@@ -103,9 +103,10 @@ public:
        void xor_RBF_sender(synchGBF* r); 
        void xor_RBF_receiver(synchGBF* r);
 	
-       //deleting BF
+       //freeing memory
        static void delete_bf();
-
+       void delete_rbf_func();
+	
        //security check
        int check_if_to_abort();   
        int check_if_to_abort1();
