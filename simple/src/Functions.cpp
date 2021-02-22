@@ -52,7 +52,7 @@ void shuffling(vector<int>* arr_indexes,unsigned int* rand){
  * @param crypt crypthographic var 
 */
 
-void functions::get_zeros_ones(BitVector* bitvector, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt){
+void functions::get_zeros_ones(BitVector* bitvector, int Not, int Nc, vector<int>*& arr_indexes,crypto *crypt,int*& new_indexes){
 
      //establishing 2 vectors of the 0's/1's indexes	
      arr_indexes=new vector<int>[2];
@@ -75,6 +75,8 @@ void functions::get_zeros_ones(BitVector* bitvector, int Not, int Nc, vector<int
      t2->join();
      delete t1;
      delete t2;
+	
+     new_indexes=new int[Nbf];
 }
 
 
@@ -146,10 +148,7 @@ void functions::arrange_indexes_thread(const Bitstring* BF,int Nbf,int* new_inde
  * @param indexes Array of the indexes of the strings
  */
 	
-void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes){
- 
-    //array for the new indexes
-    int* indexes1=new int[Nbf];
+void functions::arrange_the_indexes(const Bitstring& BF,int Nbf,vector<int>* arr_indexes, int** indexes,int Not, int Ncc,crypto *crypt,int* new_indexes){
  
     //the starting place for going over the vectors
     int place_0_begin=0;
